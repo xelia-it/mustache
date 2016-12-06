@@ -1,0 +1,6 @@
+/nbproject
+*.o
+*.so
+
+/mustache-test
+/mustache-interactive

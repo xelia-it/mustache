@@ -1,0 +1,79 @@
+////////////////////////////////////////////////////////////////////////////////
+///
+/// @file       mustache-light.hpp
+/// @author     Xelia snc <info@xelia.it>
+/// @copyright  The code is licensed under the MIT License.
+///
+///             <http://opensource.org/licenses/MIT>:
+///
+///             Copyright (c) 2015 Xelia snc
+///
+///             Permission is hereby granted, free of charge, to any person
+///             obtaining a copy of this software and associated documentation
+///             files (the "Software"), to deal in the Software without
+///             restriction, including without limitation the rights to use,
+///             copy, modify, merge, publish, distribute, sublicense, and/or
+///             sell copies of the Software, and to permit persons to whom
+///             the Software is furnished to do so, subject to the following
+///             conditions:
+///
+///             The above copyright notice and this permission notice shall be
+///             included in all copies or substantial portions of the Software.
+///
+///             THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+///             EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+///             OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+///             NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+///             HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+///             WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
+///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+///
+/// @brief      Mustache template parser.
+///
+////////////////////////////////////////////////////////////////////////////////
+
+#include <string>
+
+#include <mustache-light.hpp>
+
+using std::string;
+using mustache::Mustache;
+using mustache::RenderException;
+
+// -----------------------------------------------------------------------------
+//  Main
+
+// -----------------------------------------------------------------------------
+//  Test cases
+
+TEST_CASE("Library initialization") {
+    REQUIRE_NOTHROW(Mustache m("./test/"));
+}
+
+TEST_CASE("Basic rendering" ) {
+    Mustache m("./test/");
+
+    SECTION("Render default view and context") {
+        string res = m.render();
+        REQUIRE(res.empty());
+    }
+
+    SECTION("Render empty view and context") {
+        string res = m.render("", "{}");
+        REQUIRE(res.empty());
+    }
+
+    SECTION("Render empty view and context (by file)") {
+        string res = m.renderFilenames("empty.mustache", "empty.json");
+        REQUIRE(res.empty());
+    }
+}
+
+TEST_CASE("Try to render a non existing file") {
+    Mustache m("./test/");
+    REQUIRE_THROWS_AS(m.renderFilenames("NOT-EXISTING.mustache", "empty.json"),
+            RenderException);
+}
+
+////////////////////////////////////////////////////////////////////////////////

@@ -1,0 +1,10 @@
+{
+    "unused": "A unused variable",
+    "section1": true,
+    "data1": "Value of parameter 1",
+    "section2": false,
+    "data2": "Value of parameter 2",
+    "section3": {
+        "data3": "Data 3"
+    }
+}

@@ -1,0 +1,18 @@
+{{>partials/doctype}}
+<html>
+    <head>
+        <title>{{title}}</title>
+    </head>
+    <body>
+        <h1>{{title}}</h1>
+
+        <table>
+        <tbody>
+        {{#alarms}}
+          {{>partials/alarm}}
+        {{/alarms}}
+        </tbody>
+        </table>
+    </body>
+</html>
+{{>partials/comment}}

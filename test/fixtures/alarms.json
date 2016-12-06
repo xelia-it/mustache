@@ -1,0 +1,19 @@
+{
+    "title": "Alarm Log",
+    "alarms": [
+        {
+            "alarm-severity": "critical",
+            "module-type": "PSU",
+            "alarm-type": "Mains Fault",
+            "alarm-active": "Active",
+            "visible": true
+        },
+        {
+            "alarm-severity": "ceased",
+            "module-type": "DFE",
+            "alarm-type": "Mains Fault",
+            "alarm-active": "Ceased",
+            "visible": false
+        }
+    ]
+}
