@@ -13,8 +13,9 @@ It requires:
 
 ## Installation
 
-Copy json.hpp from nlhomann repository and catch.hpp from
-philsquared repository into project root folder. Then type:
+Copy json.hpp from nlhomann repository into project root folder.
+Copy catch.hpp from philsquared repository into test/src folder .
+Then type:
 ```
 make
 make test
@@ -28,7 +29,7 @@ Now you can link mustache.so with your C++ source code.
 
 ## TODO
 
-There a number of notable future work:
+There a number of work planned:
 * more tests
 * implementation of new commands
 * integration with CMake

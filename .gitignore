@@ -1,6 +1,18 @@
+# Netbeans project directory
 /nbproject
+
+# ctags files
+TAGS
+.tags
+tags
+
+# Libraries
 *.o
 *.so
 
+# Binaries
 /mustache-test
 /mustache-interactive
+
+# External libraries
+json.hpp
