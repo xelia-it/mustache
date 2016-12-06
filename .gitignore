@@ -15,4 +15,5 @@ tags
 /mustache-interactive
 
 # External libraries
-json.hpp
+/json.hpp
+/test/src/catch.hpp
