@@ -60,19 +60,34 @@ TEST_CASE("Sections") {
         string html = "<ul>\n"
                 "<li>someone@somewhere.com</li>"
                 "<li>another.one@somewhere.com</li>\n"
-                "</ul>";
+                "</ul>\n";
         string res = m.renderFilenames("sections/list", "sections/list");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }
 
-    SECTION("Section with list and indexes") {
+    SECTION("Section with special variables") {
         string html = "<ul>\n"
                 "<li class=\"active\">0 - someone@somewhere.com</li>"
                 "<li>1 - another.one@somewhere.com</li>"
                 "<li>2 - a.third.person@somewhere.com</li>\n"
                 "</ul>";
-        string res = m.renderFilenames("sections/list-with-indexes", "sections/list-with-indexes");
+        string res = m.renderFilenames("sections/list-special-variables",
+            "sections/list-special-variables");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with indexes") {
+        string html = "<ul>\n"
+                "<li>person_at_position_1@somewhere.com</li>\n"
+                "<li>person_at_position_2@somewhere.com</li>\n"
+                "\n"
+                "<li>person_at_position_4@somewhere.com</li>\n"
+                "<li>person_at_position_14@somewhere.com</li>\n"
+                "</ul>\n";
+        string res = m.renderFilenames("sections/list-with-indexes",
+            "sections/list-with-indexes");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }

@@ -59,7 +59,7 @@ using std::vector;
 
 namespace mustache {
 
-const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@";
+const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@[]";
 const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().\"' \n\r";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
@@ -417,12 +417,11 @@ void Mustache::produceSection() {
 
     // Is a correct type?
     bool isCorrectType = variable.is_null() || variable.is_boolean() ||
-            variable.is_string() || variable.is_array() || variable.is_object() || variable.is_number();
-    if (isCorrectType) {
-        // OK
-    } else {
-        error("Variable '" + variableName + "' must be a boolean, a string, an array, an object or a null value");
-
+            variable.is_string() || variable.is_array() ||
+            variable.is_object() || variable.is_number();
+    if (!isCorrectType) {
+        error("Variable '" + variableName + "' must be a boolean, a string, "
+                "an array, an object or a null value");
         return;
     }
 
@@ -437,14 +436,18 @@ void Mustache::produceSection() {
     // - [ a, b, c, .. ] ==> cycle
     // - [], {}, "", false, null ==> hide
     // - { something }, "something", true ==> view
-    // Section always changes {{# }} context. EG:
-    // {
+    // Section always changes context. EG:
+    //
+    // context = {
     //   "var1": { "one": 1, "two": 2 },
     //   "var2": "value2"
     // }
-    // {{#var1}} OK {{/var1}}
+    //
+    // template =  {{# var1 }}{{ one }}{{/ var1 }}
+    //
+    // output = 1
+    //
     if (useSection && variable.is_array() && variable.size() > 0) {
-        // const long int savedPosition = std::distance(tokens_.begin(), currentToken_);
         const TokenIndex savedPosition = currentToken_;
         for (json::iterator it = variable.begin(); it != variable.end(); ++it) {
             LOG_END(variable);
@@ -708,15 +711,38 @@ json Mustache::searchContext(const string& key) {
     LOG_END("SEARCH CONTEXT:");
     LOG_END(top.dump(2));
     if (top.is_null()) {
-        error("Variable " + key + " not found");
+        return "null"_json;
     }
 
-    json::const_iterator it = top.find(key);
+    std::string::size_type start;
+    std::string::size_type stop;
+    std::string::size_type index = std::string::npos;
+    string newKey = key;
+
+    if ((start = key.find_first_of("[")) != std::string::npos) {
+        if ((stop = key.find_first_of("]")) == std::string::npos) {
+            error("Missing ] in array selection");
+        }
+        if (start + 1 == stop) {
+            error("Index is empty");
+        }
+        string array = key.substr(0, start);
+        string indexAsString = key.substr(start + 1, stop - 1);
+
+        newKey = array;
+        index = std::stoul(indexAsString);
+    }
+
+    json::const_iterator it = top.find(newKey);
     if (it == top.end()) {
-        json value = false;
+        return "null"_json;
+    } else if (index == std::string::npos) {
+        LOG_END("NORMAL USE *it:");
+        json value = *it;
         return value;
     } else {
-        json value = *it;
+        LOG_END("USE INDEX:");
+        json value = (*it)[index];
         return value;
     }
 }

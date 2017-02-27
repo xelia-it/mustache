@@ -88,9 +88,30 @@ TEST_CASE("Partials") {
         string expected = "1st\n"
                 "[2nd]\n"
                 "2nd\n"
-                "3rd";
+                "3rd\n";
         string res = m.renderFilenames("partials/with-variables",
                 "partials/with-variables");
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Logic within partials") {
+        string expected = "<h3>User List</h3>\n"
+                "\n"
+                "<div>\n"
+                "    <ul>\n"
+                "        <li>Name: Mario</li>\n"
+                "        <li>Surname: Rossi</li>\n"
+                "    </ul>\n"
+                "</div>\n"
+                "<div>\n"
+                "    <ul>\n"
+                "        <li>Name: Giulio</li>\n"
+                "        <li>Surname: Bianchi</li>\n"
+                "    </ul>\n"
+                "</div>\n";
+        string res = m.renderFilenames("partials/logic-within-partials",
+                "partials/logic-within-partials");
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }

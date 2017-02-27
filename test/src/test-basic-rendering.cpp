@@ -44,13 +44,19 @@ using mustache::Mustache;
 TEST_CASE("Basic rendering") {
     Mustache m("./test/fixtures/");
 
-    SECTION("Render default view and string context") {
+    SECTION("Render empty template with null JSON") {
+        string res = m.render("", "null"_json);
+        REQUIRE(res.empty());
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Render empty template with empty string") {
         string res = m.render("", string("{}"));
         REQUIRE(res.empty());
         REQUIRE(m.error().empty());
     }
 
-    SECTION("Render default view and JSON context") {
+    SECTION("Render empty template with empty JSON") {
         string res = m.render("", "{}"_json);
         REQUIRE(res.empty());
         REQUIRE(m.error().empty());
@@ -69,7 +75,7 @@ TEST_CASE("Basic rendering") {
         REQUIRE(m.error().empty());
     }
 
-    SECTION("Render basic html") {
+    SECTION("Render basic html with empty context") {
         string html = "<!DOCTYPE html>\n"
                 "<html>\n"
                 "    <head>\n"
