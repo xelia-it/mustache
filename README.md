@@ -31,6 +31,7 @@ Now you can link mustache.so with your C++ source code.
 
 There a number of work planned:
 * more tests
+* use of git submodule to link to original projects
 * implementation of new commands
 * integration with CMake
 

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       mustache-light.hpp
+/// @file       test-basic-rendering.hpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -29,51 +29,68 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache template parser.
+/// @brief      Mustache test suite (basic rendering).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <string>
+#include "catch.hpp"
 
+#include <string>
 #include <mustache-light.hpp>
 
 using std::string;
 using mustache::Mustache;
-using mustache::RenderException;
 
-// -----------------------------------------------------------------------------
-//  Main
+TEST_CASE("Basic rendering") {
+    Mustache m("./test/fixtures/");
 
-// -----------------------------------------------------------------------------
-//  Test cases
-
-TEST_CASE("Library initialization") {
-    REQUIRE_NOTHROW(Mustache m("./test/"));
-}
-
-TEST_CASE("Basic rendering" ) {
-    Mustache m("./test/");
-
-    SECTION("Render default view and context") {
-        string res = m.render();
+    SECTION("Render default view and string context") {
+        string res = m.render("", string("{}"));
         REQUIRE(res.empty());
+        REQUIRE(m.error().empty());
     }
 
-    SECTION("Render empty view and context") {
-        string res = m.render("", "{}");
+    SECTION("Render default view and JSON context") {
+        string res = m.render("", "{}"_json);
         REQUIRE(res.empty());
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Render basic view and context") {
+        string html = "<html><body></body></html>";
+        string res = m.render(html, string("{}"));
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
     }
 
     SECTION("Render empty view and context (by file)") {
-        string res = m.renderFilenames("empty.mustache", "empty.json");
+        string res = m.renderFilenames("basic/empty", "basic/empty");
         REQUIRE(res.empty());
+        REQUIRE(m.error().empty());
     }
-}
 
-TEST_CASE("Try to render a non existing file") {
-    Mustache m("./test/");
-    REQUIRE_THROWS_AS(m.renderFilenames("NOT-EXISTING.mustache", "empty.json"),
-            RenderException);
+    SECTION("Render basic html") {
+        string html = "<!DOCTYPE html>\n"
+                "<html>\n"
+                "    <head>\n"
+                "        <title>Title</title>\n"
+                "    </head>\n"
+                "    <body>\n"
+                "        <h1>Title</h1>\n"
+                "    </body>\n"
+                "</html>";
+        string res = m.renderFilenames("basic/simple-html", "basic/empty");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Render two equal variables") {
+        string html = "VariableVariable";
+        string res = m.renderFilenames("basic/two-equal-variables",
+                "basic/two-equal-variables");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////

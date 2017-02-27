@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       main.cpp
+/// @file       main.hpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -29,18 +29,18 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache test suite (main file).
+/// @brief      Mustache test suite (common include).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-/// #include "test-library-initialization.hpp"
-/// #include "test-basic-rendering.hpp"
-////#include "test-errors.hpp"
-//// #include "test-logic.cpp"
-//// #include "test-sections.cpp"
-//// #include "test-partials.cpp"
+#include <iostream>
+#include <string> 
+#include <mustache-light.hpp>
+
+using std::string;
+using mustache::Mustache;
+using mustache::RenderException;
 
 ////////////////////////////////////////////////////////////////////////////////

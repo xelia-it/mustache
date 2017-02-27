@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       main.cpp
+/// @file       test-errors.cpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -29,18 +29,33 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache test suite (main file).
+/// @brief      Mustache test suite (test error conditions).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-/// #include "test-library-initialization.hpp"
-/// #include "test-basic-rendering.hpp"
-////#include "test-errors.hpp"
-//// #include "test-logic.cpp"
-//// #include "test-sections.cpp"
-//// #include "test-partials.cpp"
+#include <string>
+#include <mustache-light.hpp>
+
+using std::string;
+using mustache::Mustache;
+
+TEST_CASE("Rendering with errors") {
+    Mustache m("./test/fixtures/");
+
+    SECTION("Error in parenthesis") {
+        string html = "<!DOCTYPE html>\n"
+                "<html>\n"
+                "    <head>\n"
+                "        <title>Page with error</title>\n"
+                "    </head>\n"
+                "    <body>\n"
+                "        <h1>A basic title";
+        string res = m.renderFilenames("errors/parenthesis", "errors/errors");
+        REQUIRE(res == html);
+        REQUIRE(m.error() == "Missing }}");
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////

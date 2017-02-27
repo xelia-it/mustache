@@ -162,6 +162,7 @@ class Mustache {
     ///      The error message.
     ///
     string error() const;
+
     string renderFilenames(const string& viewFileName, const string& contextFileName);
 
     string fileRead(const string& fileName, const string& fileExtension);
@@ -199,7 +200,6 @@ class Mustache {
     TokenIndex currentToken_;
     Variables partialVariables_;
     std::size_t currentListCounter_;
-    
 
     /// Used to manage sections.
     /// When a block {{#var}} ... {{/var}} is found the parser should
@@ -264,7 +264,7 @@ class Mustache {
     // Dump partial variables.
     void dumpVariables();
 #endif
- 
+
     // trim from start
     string& ltrim(string& s);
 

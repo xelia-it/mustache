@@ -1,0 +1,59 @@
+# Mustache
+
+# Uncomment this line to activate debug
+# DEFS += -DDEBUG
+
+# Other definition
+LIBRARY_SONAME := mustache
+LIBRARY_NAME := lib$(LIBRARY_SONAME).so
+CPP_FILES := $(wildcard src/*.cpp)
+OBJ_FILES := $(CPP_FILES:.cpp=.o)
+
+# INTERACTIVE_NAME := mustache-interactive
+
+TEST_NAME := mustache-test
+# TEST_CPP_FILES := $(wildcard test/src/*.cpp)
+TEST_CPP_FILES := test/src/main.cpp \
+	test/src/test-basic-rendering.cpp
+TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
+
+CC_FLAGS := -I. -I./src --std=c++11 -fPIC $(DEFS)
+LD_FLAGS := -l$(LIBRARY_SONAME) -L.
+
+# Targets
+
+
+all: $(LIBRARY_NAME) $(TEST_NAME)
+
+info:
+	@echo $(CPP_FILES)
+	@echo $(OBJ_FILES)
+	@echo $(TEST_CPP_FILES)
+	@echo $(TEST_OBJ_FILES)
+
+clean:
+	rm -f $(OBJ_FILES) $(TEST_OBJ_FILES) $(TEST_NAME) $(INTERACTIVE_NAME) $(LIBRARY_NAME)
+
+check:
+	cppcheck --enable=all --quiet --inconclusive --std=c++11 \
+	$(TEST_NAME).cpp $(TEST_CPP_FILES) $(CPP_FILES)
+
+#test: all
+#	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(TEST_NAME)
+
+# Build mustache library
+$(LIBRARY_NAME): $(OBJ_FILES)
+	$(CXX) -shared -Wl,-soname,$(LIBRARY_NAME) -o $(LIBRARY_NAME) -o $@ $^
+
+# Build interactive
+#$(INTERACTIVE_NAME): $(LIBRARY_NAME) $(INTERACTIVE_NAME).cpp
+#	$(CXX) $(CC_FLAGS) $(INTERACTIVE_NAME).cpp -o $(INTERACTIVE_NAME) $(LD_FLAGS)
+
+# Build interactive
+$(TEST_NAME): $(LIBRARY_NAME) $(TEST_OBJ_FILES)
+	echo $(TEST_OBJ_FILES)
+	$(CXX) $(CC_FLAGS) $(TEST_OBJ_FILES) -o $(TEST_NAME) $(LD_FLAGS)
+
+%.o: %.cpp %.hpp Makefile
+	@echo "[g++] $@"
+	$(CXX) $(CC_FLAGS) -c -o $@ $<

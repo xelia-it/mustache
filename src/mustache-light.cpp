@@ -44,12 +44,12 @@ using json = nlohmann::json;
 
 #include <iostream>
 #include <vector>
-// Used for readFile 
+// Used for readFile
 #include <fstream>
 #include <string>
 
-#include <algorithm> 
-#include <functional> 
+#include <algorithm>
+#include <functional>
 #include <cctype>
 #include <locale>
 
@@ -173,7 +173,7 @@ string Mustache::error() const {
 string Mustache::renderFilenames(const string& viewFileName, const string& contextFileName) {
     const string& view = fileRead(viewFileName);
     const string& context = fileRead(contextFileName, "json");
-    
+
     return render(view, context);
 }
 
@@ -198,7 +198,7 @@ string Mustache::fileRead(const string& fileName) {
 
 string Mustache::render() {
     error_.clear();
-    
+
     // Tokenize view
 #ifdef DEBUG
     LOG_END("BEFORE TOKEN");
@@ -219,7 +219,6 @@ string Mustache::render() {
     stack_.push(data_);
     visible_ = true;
     rendered_.clear();
-
 
     LOG_END("------------------------------------------------------");
     LOG_END("Render:");
@@ -494,7 +493,7 @@ void Mustache::produceSection() {
     LOG(variableNameEnd);
     ensureValidIdentifier(variableName);
     if (variableNameEnd != variableName) {
-        error("Expected '" + variableName + "' in closing block (found '" + 
+        error("Expected '" + variableName + "' in closing block (found '" +
                 variableNameEnd + "')");
         return;
     }
@@ -634,7 +633,7 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
             LOG(" : ");
             LOG(lb->second);
             LOG_END(" }");
-            
+
             // Substitution
             LOG("    Substitute: ");
             string valueToSubstitute = lb->second;
@@ -648,13 +647,13 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
                 // newTokens.at(i) = valueToSubstitute;
             } else {
                 // Substitute literal
-                
+
                 if (tokenToCheckPrev != TOKEN_START_VARIABLE) {
                     LOG_END("");
                     LOG_END("NOT A VARIABLE SKIP LITERAL SUBSTITUTION!");
                     continue;
                 }
-                
+
                 if (valueToSubstitute[valueToSubstitute.size() - 1 ] != '\'' && valueToSubstitute[valueToSubstitute.size() - 1] != '\"') {
                     error("Substitution string " + valueToSubstitute + " should end with apostrophe or double-apostrophe");
                 }
@@ -726,7 +725,7 @@ Mustache::VariableIterator Mustache::searchVariable(const string& valueToSearch)
     VariableIterator it;
     LOG("  Search in variables: ");
     LOG(valueToSearch);
-   
+
     if (valueToSearch[0] == '\'' || valueToSearch[0] == '\"') {
         return partialVariables_.end();
     }

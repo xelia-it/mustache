@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       main.cpp
+/// @file       test-sections.cpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -29,18 +29,53 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache test suite (main file).
+/// @brief      Mustache test suite (test sections).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-/// #include "test-library-initialization.hpp"
-/// #include "test-basic-rendering.hpp"
-////#include "test-errors.hpp"
-//// #include "test-logic.cpp"
-//// #include "test-sections.cpp"
-//// #include "test-partials.cpp"
+#include <string>
+#include <mustache-light.hpp>
+
+using std::string;
+using mustache::Mustache;
+
+TEST_CASE("Sections") {
+    Mustache m("./test/fixtures/");
+
+    SECTION("Section with data") {
+        string html = "<div>\n"
+                "<p></p>\n"
+                "\n"
+                "<p>Data 3</p>\n"
+                "</div>";
+        string res = m.renderFilenames("sections/sections-with-data",
+                "sections/sections-with-data");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with list") {
+        string html = "<ul>\n"
+                "<li>someone@somewhere.com</li>"
+                "<li>another.one@somewhere.com</li>\n"
+                "</ul>";
+        string res = m.renderFilenames("sections/list", "sections/list");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with list and indexes") {
+        string html = "<ul>\n"
+                "<li class=\"active\">0 - someone@somewhere.com</li>"
+                "<li>1 - another.one@somewhere.com</li>"
+                "<li>2 - a.third.person@somewhere.com</li>\n"
+                "</ul>";
+        string res = m.renderFilenames("sections/list-with-indexes", "sections/list-with-indexes");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+}
 
 ////////////////////////////////////////////////////////////////////////////////

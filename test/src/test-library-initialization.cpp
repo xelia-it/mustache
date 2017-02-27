@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       main.cpp
+/// @file       main.hpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -33,14 +33,16 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
-/// #include "test-library-initialization.hpp"
-/// #include "test-basic-rendering.hpp"
-////#include "test-errors.hpp"
-//// #include "test-logic.cpp"
-//// #include "test-sections.cpp"
-//// #include "test-partials.cpp"
+#include <mustache-light.hpp>
+
+using mustache::Mustache;
+
+TEST_CASE("Library initialization") {
+    REQUIRE_NOTHROW([&](){
+        Mustache m("./test/fixtures/");
+    }());
+}
 
 ////////////////////////////////////////////////////////////////////////////////
