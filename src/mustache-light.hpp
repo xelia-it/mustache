@@ -106,6 +106,7 @@ class Mustache {
 
     typedef map<string, string> Variables;
     typedef Variables::iterator VariableIterator;
+    typedef Variables::const_iterator VariableConstIterator;
     typedef string Token;
     typedef vector<Token> Tokens;
     // typedef Tokens::iterator TokenIterator;
@@ -198,13 +199,13 @@ class Mustache {
 
     Tokens tokens_;
     TokenIndex currentToken_;
-    Variables partialVariables_;
     std::size_t currentListCounter_;
 
     /// Used to manage sections.
     /// When a block {{#var}} ... {{/var}} is found the parser should
     /// iterate inside it.
     stack<json> stack_;
+
 
     // Used to hide/view a section
     bool visible_;
@@ -226,6 +227,17 @@ class Mustache {
 
     void partialSubstitute(const Tokens partialParams, Tokens& newTokens);
 
+    /// Searches a variable inside a Variable list.
+    ///
+    /// @param  variables     The variable list
+    /// @param  valueToSearch The key to search for
+    ///
+    /// @return               A VariableConstIterator pointer to pair found,
+    ///                       or variable_.end() if nothing is found.
+    ///
+    VariableConstIterator partialSearchVariable(const Variables& variables,
+        const string& valueToSearch);
+
     /// Throws an exception and stops rendering.
     void error(const string& message);
 
@@ -233,16 +245,6 @@ class Mustache {
     /// TODO: refactor name..
     json searchContext(const string& key);
 
-    /// Searches a key within variables_ container.
-    ///
-    /// @param valueToSearch
-    ///     The key to search for.
-    ///
-    /// @return
-    ///     A VariableIterator pointer to pair found, or
-    ///     variable_.end() if nothing is found.
-    ///
-    VariableIterator searchVariable(const string& valueToSearch);
 
     /// A valid identifier <em>must</em> contain only lowercase characters,
     /// decimal digits and minus (-). No space or other characters allowed.

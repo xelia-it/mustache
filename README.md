@@ -14,7 +14,7 @@ It requires:
 ## Installation
 
 Copy json.hpp from nlhomann repository into project root folder.
-Copy catch.hpp from philsquared repository into test/src folder .
+Copy catch.hpp from philsquared repository into test/src folder.
 Then type:
 ```
 make
@@ -33,6 +33,7 @@ There a number of work planned:
 * more tests
 * use of git submodule to link to original projects
 * implementation of new commands
+* improve documentation
 * integration with CMake
 
 ## License

@@ -86,7 +86,7 @@ TEST_CASE("Partials") {
 
     SECTION("Partials with variables") {
         string expected = "1st\n"
-                "[2nd]\n"
+                "[]\n"
                 "2nd\n"
                 "3rd\n";
         string res = m.renderFilenames("partials/with-variables",
@@ -95,8 +95,9 @@ TEST_CASE("Partials") {
         REQUIRE(m.error().empty());
     }
 
-    SECTION("Logic within partials") {
+    SECTION("Multiple partials with variables") {
         string expected = "<h3>User List</h3>\n"
+                "\n"
                 "\n"
                 "<div>\n"
                 "    <ul>\n"
@@ -104,14 +105,44 @@ TEST_CASE("Partials") {
                 "        <li>Surname: Rossi</li>\n"
                 "    </ul>\n"
                 "</div>\n"
+                "\n"
+                "\n"
+                "<div>\n"
+                "    <ul>\n"
+                "        <li>Name: John</li>\n"
+                "        <li>Surname: Smith</li>\n"
+                "    </ul>\n"
+                "</div>\n"
+                "\n"
+                "\n"
                 "<div>\n"
                 "    <ul>\n"
                 "        <li>Name: Giulio</li>\n"
                 "        <li>Surname: Bianchi</li>\n"
                 "    </ul>\n"
+                "</div>\n"
+                "\n"
+                "\n"
+                "<div>\n"
+                "    <ul>\n"
+                "        <li>Name: Valerio</li>\n"
+                "        <li>Surname: Verdi</li>\n"
+                "    </ul>\n"
                 "</div>\n";
-        string res = m.renderFilenames("partials/logic-within-partials",
-                "partials/logic-within-partials");
+        string res = m.renderFilenames("partials/multiple-partials-with-variables",
+                "partials/multiple-partials-with-variables");
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Partials inside hidden block") {
+        string expected = "visible\n"
+                "\n"
+                "\n"
+                "visible\n"
+                "\n";
+        string res = m.renderFilenames("partials/partial-inside-hidden-block",
+                "partials/partial-inside-hidden-block");
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }

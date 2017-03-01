@@ -49,5 +49,5 @@ $(INTERACTIVE_NAME): $(LIBRARY_NAME) $(INTERACTIVE_NAME).cpp
 $(TEST_NAME): $(LIBRARY_NAME) $(TEST_OBJ_FILES)
 	$(CXX) $(LD_FLAGS) $(TEST_OBJ_FILES) -o $(TEST_NAME)
 
-%.o: %.cpp
+%.o: %.cpp Makefile
 	$(CXX) $(CC_FLAGS) -c -o $@ $<
