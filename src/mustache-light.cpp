@@ -375,7 +375,9 @@ void Mustache::produceVariable() {
                                         rendered_.append("true");
                                 }
                         } else if (variable.is_string()) {
-                                rendered_.append(variable.get<string>());
+                                string toBeAppended = variable.get<string>();
+                                htmlEscape(toBeAppended);
+                                rendered_.append(toBeAppended);
                         } else {
                                 rendered_.append(variable.dump());
                         }
@@ -832,6 +834,27 @@ inline std::string& Mustache::rtrim(string& s) {
 // trim from both ends
 inline string& Mustache::trim(string& s) {
         return ltrim(rtrim(s));
+}
+
+void Mustache::htmlEscape(string& data) {
+        std::string buffer;
+        buffer.reserve(data.size() * 1.2);
+        for(size_t pos = 0; pos != data.size(); ++pos) {
+                switch(data[pos]) {
+                        case '&':  buffer.append("&amp;");       break;
+                        case '\"': buffer.append("&quot;");      break;
+                        case '\'': buffer.append("&apos;");      break;
+                        case '<':  buffer.append("&lt;");        break;
+                        case '>':  buffer.append("&gt;");        break;
+                        case '%':  buffer.append("&percnt;");    break;
+                        default:
+                                if (data[pos] > 31) {
+                                        buffer.append(&data[pos], 1);
+                                }
+                        break;
+                }
+        }
+        data.swap(buffer);
 }
 
 }  // namespace mustache

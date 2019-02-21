@@ -284,6 +284,9 @@ class Mustache {
     // trim from both ends
     string& trim(string& s);
 
+    // Escapes dangerous characters
+    void htmlEscape(string& stringToEscape);
+
     // Disallow default constructor, copy constructor and assign operator
     Mustache();
     Mustache(const Mustache&);
