@@ -71,7 +71,7 @@ class RenderException : public std::runtime_error {
     /// @param what
     ///      Error message
     ///
-    RenderException(const string& what) :
+    explicit RenderException(const string& what) :
             std::runtime_error(what) {
     }
 };
@@ -118,7 +118,7 @@ class Mustache {
     /// @param basePath
     ///     Base path for file searching. Must be an absolute path.
     ///
-    Mustache(const string& basePath);
+    explicit Mustache(const string& basePath);
 
     /// Construct a new Mustache object, using basePath as base partial
     /// search path.
@@ -185,20 +185,29 @@ class Mustache {
     static const string TOKEN_END;
     static const string DEFAULT_PARTIAL_EXTENSION;
 
+    /// Base path is added to file name each time a file must be opened.
     string basePath_;
+
     string partialExtension_;
+
     /// The HTML template containing tags to evaluate {{ ... }}
     string view_;
+
     /// The context
     string context_;
+
     json data_;
+
     /// Stores render result
     string rendered_;
+
     /// Stores error message
     string error_;
 
     Tokens tokens_;
+
     TokenIndex currentToken_;
+
     std::size_t currentListCounter_;
 
     /// Used to manage sections.
@@ -206,8 +215,7 @@ class Mustache {
     /// iterate inside it.
     stack<json> stack_;
 
-
-    // Used to hide/view a section
+    /// Used to hide/view a section
     bool visible_;
 
     /// Starts the rendering process.

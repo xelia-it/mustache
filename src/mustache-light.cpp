@@ -37,7 +37,6 @@
 
 // Please download from:
 //   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
-/// #include <curses.h>
 
 #include <json.hpp>
 using json = nlohmann::json;
@@ -125,13 +124,15 @@ const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
         CHECK_TOKEN_IS_NOT(TOKEN_END)
 
 Mustache::Mustache(const string& basePath) :
-        basePath_(basePath), visible_(true), view_(""), context_("{}"),
-        partialExtension_(DEFAULT_PARTIAL_EXTENSION), currentListCounter_(0) {
+        basePath_(basePath), partialExtension_(DEFAULT_PARTIAL_EXTENSION),
+        view_(""), context_("{}"),
+        currentListCounter_(0), visible_(true) {
 }
 
 Mustache::Mustache(const string& basePath, const string& partialExtension) :
-        basePath_(basePath), visible_(true), view_(""), context_("{}"),
-        partialExtension_(partialExtension), currentListCounter_(0) {
+        basePath_(basePath), partialExtension_(partialExtension),
+        view_(""), context_("{}"),
+        currentListCounter_(0), visible_(true) {
 }
 
 Mustache::~Mustache() {
@@ -534,7 +535,7 @@ void Mustache::producePartial() {
 
         // Split token using partial variable separator.
         Tokens splitted = split(partialToken, '|');
-        for (int i = 0; i < splitted.size(); i++) {
+        for (size_t i = 0; i < splitted.size(); i++) {
                 splitted.at(i) = trim(splitted.at(i));
         }
 
