@@ -46,6 +46,7 @@ using json = nlohmann::json;
 // Used for readFile
 #include <fstream>
 #include <string>
+#include <sstream>
 
 #include <algorithm>
 #include <functional>
@@ -744,6 +745,7 @@ json Mustache::searchContext(const string& key) {
 
         json::const_iterator it = top.find(newKey);
         if (it == top.end()) {
+                LOG_END("NOT FOUND:");
                 return "null"_json;
         } else if (index == std::string::npos) {
                 LOG_END("NORMAL USE *it:");
@@ -751,6 +753,16 @@ json Mustache::searchContext(const string& key) {
                 return value;
         } else {
                 LOG_END("USE INDEX:");
+                // top exists at this point
+                if (it->is_array()) {
+                    LOG_END("USE ARRAY:");
+                    if (index >= it->size()) {
+                      LOG_END("OUT OF RANGE:");
+                      return "null"_json;
+                    } else {
+                      LOG_END("IN RANGE:");
+                    }
+                }
                 json value = (*it)[index];
                 return value;
         }
