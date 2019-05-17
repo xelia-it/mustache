@@ -35,6 +35,7 @@
 
 #include "catch.hpp"
 
+#include <iostream>
 #include <string>
 #include <mustache-light.hpp>
 
@@ -88,6 +89,14 @@ TEST_CASE("Sections") {
                 "</ul>\n";
         string res = m.renderFilenames("sections/list-with-indexes",
             "sections/list-with-indexes");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with missing indexes") {
+        string html = "<p>John</p>\n\n";
+        string res = m.renderFilenames("sections/short-list-with-index",
+                                       "sections/short-list-with-index");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }
