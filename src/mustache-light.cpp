@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -63,6 +63,7 @@ const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().\"' \n\r";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
+const string Mustache::TOKEN_START_COMMENT = "{{!";
 const string Mustache::TOKEN_START_BEGIN_SECTION = "{{#";
 const string Mustache::TOKEN_START_END_SECTION = "{{/";
 const string Mustache::TOKEN_START_IF = "{{=";
@@ -117,10 +118,12 @@ const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
 #define CHECK_TOKEN_IS_TEXT() \
         CHECK_TOKEN_NOT_EMPTY(); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE); \
+        CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_IF); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS); \
+        CHECK_TOKEN_IS_NOT(TOKEN_START_NULL_TEST); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE); \
         CHECK_TOKEN_IS_NOT(TOKEN_END)
@@ -271,6 +274,9 @@ vector<string> Mustache::tokenize(const string& view) {
                                 } else if (view[pos + 2] == '<') {
                                         tokens.push_back(TOKEN_START_TEMPLATE);
                                         prev = pos + 3;
+                                } else if (view[pos + 2] == '!') {
+                                        tokens.push_back(TOKEN_START_COMMENT);
+                                        prev = pos + 3;
                                 } else {
                                         tokens.push_back(TOKEN_START_VARIABLE);
                                         prev = pos + 2;
@@ -397,6 +403,20 @@ void Mustache::produceVariable() {
         LOG_END(TOKEN_END);
 }
 
+void Mustache::produceComment() {
+        LOG_END("VARIABLE := ");
+        LOG_START(TOKEN_START_VARIABLE);
+
+        // Token must be (txt)
+        CHECK_TOKEN_IS_TEXT();
+
+        CONSUME_TOKEN();
+        CHECK_TOKEN_NOT_EMPTY();
+        CHECK_TOKEN_IS(TOKEN_END);
+        LOG("  ");
+        LOG_END(TOKEN_END);
+}
+
 void Mustache::produceSection() {
         bool useSection = (tokens_.at(currentToken_ - 1) == TOKEN_START_BEGIN_SECTION);
         bool useUnless = (tokens_.at(currentToken_ - 1) == TOKEN_START_UNLESS);
@@ -483,7 +503,6 @@ void Mustache::produceSection() {
                 if (useNull) {
                         // The null test {{? }} uses a simplified logic
                         hide = variable.is_null();
-                        std::cout << variable.dump() << std::endl;
                 } else if (useUnless) {
                         // The inverted section {{^ }} uses inverted logic
                         hide = !hide;
@@ -614,7 +633,7 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
                 }
                 vector<string> pair = split(token, '=');
                 if (pair.size() != 2) {
-                        error("Bad substitution string: too many '=' in " + token);
+                        error("Bad substitution string: missing separator in " + token);
                 }
 
                 VariableConstIterator lb = partialSearchVariable(partialVariables, pair.at(1));
@@ -685,7 +704,7 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
                                 }
 
                                 if (valueToSubstitute[valueToSubstitute.size() - 1 ] != '\'' && valueToSubstitute[valueToSubstitute.size() - 1] != '\"') {
-                                        error("Substitution string " + valueToSubstitute + " should end with apostrophe or double-apostrophe");
+                                        error("Substitution string " + valueToSubstitute + " not properly closed");
                                 }
                                 LOG(" with literal ");
                                 valueToSubstitute = valueToSubstitute.substr(1, valueToSubstitute.size() - 2);

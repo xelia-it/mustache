@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -33,12 +33,12 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "catch.hpp"
-
 #include <string>
-#include <mustache-light.hpp>
-
 using std::string;
+
+#include "../../catch.hpp"
+
+#include "../../src/mustache-light.hpp"
 using mustache::Mustache;
 
 TEST_CASE("Basic rendering") {

@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       test-errors.cpp
+/// @file       test-templates.cpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
@@ -29,7 +29,7 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache test suite (test error conditions).
+/// @brief      Mustache test suite (test templates).
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -41,62 +41,31 @@ using std::string;
 #include "../../src/mustache-light.hpp"
 using mustache::Mustache;
 
-TEST_CASE("Rendering with errors") {
+TEST_CASE("Templates") {
     Mustache m("./test/fixtures/");
 
-    SECTION("Error in parenthesis") {
-        string html = "<!DOCTYPE html>\n"
-                "<html>\n"
-                "    <head>\n"
-                "        <title>Page with error</title>\n"
-                "    </head>\n"
-                "    <body>\n"
-                "        <h1>A basic title";
-        string res = m.renderFilenames("errors/parenthesis", "errors/errors");
-        REQUIRE(res == html);
-        REQUIRE(m.error() == "Missing }}");
-    }
-
-    SECTION("Error in partial literal") {
+    SECTION("Basic template") {
         string html = "<!DOCTYPE html>\n"
             "<html>\n"
             "    <head>\n"
-            "        <title>Page with partial literal error</title>\n"
+            "        <title>Template Example</title>\n"
             "    </head>\n"
             "    <body>\n"
-            "        <h1>A basic title</h1>\n"
-            "        ";
-        string res = m.renderFilenames("errors/partial-literal", "errors/errors");
-        REQUIRE(res == html);
-        REQUIRE(m.error() == "Substitution string 'Name not properly closed");
-    }
+            "        <h1>Template Example</h1>\n"
+            "\n"
+            "        <table>\n"
+            "        <tbody>\n"
+            "        Content of the page\n"
+            "\n"
+            "        </tbody>\n"
+            "        </table>\n"
+            "    </body>\n"
+            "</html>\n";
 
-    SECTION("Error in partial separator") {
-        string html = "<!DOCTYPE html>\n"
-            "<html>\n"
-            "    <head>\n"
-            "        <title>Page with partial separator error</title>\n"
-            "    </head>\n"
-            "    <body>\n"
-            "        <h1>A basic title</h1>\n"
-            "        ";
-        string res = m.renderFilenames("errors/partial-separator", "errors/errors");
+        string res = m.renderFilenames("templates/basic-template",
+                                       "templates/basic-template");
         REQUIRE(res == html);
-        REQUIRE(m.error() == "Bad substitution string: missing separator in Name='John' Surname='Doe'");
-    }
-
-    SECTION("Error section not closed") {
-        string html = "<!DOCTYPE html>\n"
-            "<html>\n"
-            "    <head>\n"
-            "        <title>Page with section error</title>\n"
-            "    </head>\n"
-            "    <body>\n"
-            "        <h1>A basic title</h1>\n"
-            "        ";
-        string res = m.renderFilenames("errors/section-not-closed", "errors/errors");
-        REQUIRE(res == html);
-        REQUIRE(m.error() == "Missing {{/");
+        REQUIRE(m.error().empty());
     }
 }
 

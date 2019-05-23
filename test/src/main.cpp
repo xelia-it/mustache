@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -34,13 +34,6 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #define CATCH_CONFIG_MAIN
-#include "catch.hpp"
-
-/// #include "test-library-initialization.hpp"
-/// #include "test-basic-rendering.hpp"
-////#include "test-errors.hpp"
-//// #include "test-logic.cpp"
-//// #include "test-sections.cpp"
-//// #include "test-partials.cpp"
+#include "../../catch.hpp"
 
 ////////////////////////////////////////////////////////////////////////////////

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Page with section error</title>
+        <title>Page with partial literal error</title>
     </head>
     <body>
-        <h1>Title</h1>
-        {{>partials/user|Label='Name|Surname'|Surname='Surname'}}
+        <h1>{{ title }}</h1>
+        {{> partials/common/comment | title='Name }}
     </body>
 </html>

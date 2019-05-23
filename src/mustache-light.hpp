@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -78,6 +78,7 @@ class RenderException : public std::runtime_error {
 
 /// Tokens:
 ///   sv = start variable = {{
+///   sc = start comment = {{!
 ///   sb = start begin of section = {{#
 ///   se = start end of section = {{/
 ///   si = start if = {{=
@@ -89,10 +90,11 @@ class RenderException : public std::runtime_error {
 ///   txt = (sequence of txt)
 ///
 /// Grammar:
-///   MESSAGE   := VARIABLE MESSAGE | SECTION MESSAGE |
+///   MESSAGE   := VARIABLE MESSAGE | COMMENT MESSAGE | SECTION MESSAGE |
 ///                IF MESSAGE | UNLESS MESSAGE | NULL_TEST MESSAGE
 ///                PARTIAL MESSAGE | txt MESSAGE | (empty)
 ///   VARIABLE  := sv txt ee
+///   COMMENT   := sc txt ee
 ///   IF        := si txt ee
 ///   NULL_TEST := sn txt ee
 ///   UNLESS    := sv txt ee
@@ -178,6 +180,7 @@ class Mustache {
     /// List of all valid characters for partial tag.
     static const string VALID_CHARS_FOR_PARTIALS;
     static const string TOKEN_START_VARIABLE;
+    static const string TOKEN_START_COMMENT;
     static const string TOKEN_START_BEGIN_SECTION;
     static const string TOKEN_START_END_SECTION;
     static const string TOKEN_START_IF;
@@ -231,6 +234,7 @@ class Mustache {
     // Productions
     void produceMessage();
     void produceVariable();
+    void produceComment();
     void produceSection();
     void produceIf();
     void produceUnless();

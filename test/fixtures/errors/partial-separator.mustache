@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Page with error in partial</title>
+        <title>Page with partial separator error</title>
     </head>
     <body>
-        <h1>Title</h1>
-        {{>partials/user|Label=UserLabel Surname='UserSurname'}}
+        <h1>{{title}}</h1>
+        {{> partials/common/user | Name='John' Surname='Doe' }}
     </body>
 </html>
