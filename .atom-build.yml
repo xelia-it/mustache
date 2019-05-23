@@ -1,5 +1,0 @@
-# Atom build
-#
-
-cmd: make
-name: Build mustache
