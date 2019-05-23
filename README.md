@@ -36,7 +36,8 @@ Now you can link mustache.so with your C++ source code.
 
 ## Unimplemented commands
 
-* Comments
+* ``{{! comment }}`` - Comments
+* ``{{{ var }}}`` - Unescaped variable substitution
 * Lambdas
 * Set Delimiters
 
@@ -51,7 +52,7 @@ Like partials but takes partial to open from a variable.
 Like sections but *do not change context*.
 It's used to check if a variable exists.
 
-``{{? var }} {{\ var }}`` - Null tests
+``{{0 var }} {{\ var }}`` - Null tests
 
 Like sections but *do not change context*.
 It's used to check if a variable is null.
