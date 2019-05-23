@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -33,13 +33,12 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include "catch.hpp"
-
-#include <iostream>
 #include <string>
-#include <mustache-light.hpp>
-
 using std::string;
+
+#include "../../catch.hpp"
+
+#include "../../src/mustache-light.hpp"
 using mustache::Mustache;
 
 TEST_CASE("Sections") {
@@ -95,8 +94,29 @@ TEST_CASE("Sections") {
 
     SECTION("Section with missing indexes") {
         string html = "<p>John</p>\n\n";
-        string res = m.renderFilenames("sections/short-list-with-index",
-                                       "sections/short-list-with-index");
+        string res = m.renderFilenames("sections/list-with-missing-index",
+                                       "sections/list-with-missing-index");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with null values") {
+        string html = "<p>A simple string</p>\n"
+                      "<p></p>\n"
+                      "<p>0</p>\n"
+                      "<p>0.0</p>\n"
+                      "<p>23</p>\n"
+                      "<p>23.02</p>\n"
+                      "<p>true</p>\n"
+                      "<p></p>\n"
+                      "\n"
+                      "<p></p>\n"
+                      "<p></p>\n"
+                      "\n"
+                      "<p></p>\n"
+                      "<p></p>\n";
+        string res = m.renderFilenames("sections/sections-null-test",
+                                       "sections/sections-null-test");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }

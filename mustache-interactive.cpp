@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -49,8 +49,8 @@ using json = nlohmann::json;
 // -----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-    string view = "empty";
-    string context = "empty";
+    string view = "basic/empty";
+    string context = "basic/empty";
 
     if (argc == 1) {
         // OK

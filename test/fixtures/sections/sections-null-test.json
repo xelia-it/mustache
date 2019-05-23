@@ -1,0 +1,19 @@
+{
+    "simple_string": "A simple string",
+    "empty_string": "",
+    "zero_integer": 0,
+    "zero_float": 0.0,
+    "number_integer": 23,
+    "number_float": 23.02,
+    "boolean_true": true,
+    "boolean_false": false,
+    "null_value": null,
+    "object_empty": {},
+    "object_full": {
+        "name": "John"
+    },
+    "array_empty": [],
+    "array_full": [
+        "John", "Doe"
+    ]
+}

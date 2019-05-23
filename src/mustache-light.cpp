@@ -6,7 +6,7 @@
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -38,7 +38,7 @@
 // Please download from:
 //   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
 
-#include <json.hpp>
+#include "../json.hpp"
 using json = nlohmann::json;
 
 #include <iostream>
@@ -63,9 +63,11 @@ const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().\"' \n\r";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
+const string Mustache::TOKEN_START_COMMENT = "{{!";
 const string Mustache::TOKEN_START_BEGIN_SECTION = "{{#";
 const string Mustache::TOKEN_START_END_SECTION = "{{/";
 const string Mustache::TOKEN_START_IF = "{{=";
+const string Mustache::TOKEN_START_NULL_TEST = "{{0";
 const string Mustache::TOKEN_START_UNLESS = "{{^";
 const string Mustache::TOKEN_START_PARTIAL = "{{>";
 const string Mustache::TOKEN_START_TEMPLATE = "{{<";
@@ -116,10 +118,12 @@ const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
 #define CHECK_TOKEN_IS_TEXT() \
         CHECK_TOKEN_NOT_EMPTY(); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE); \
+        CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_IF); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS); \
+        CHECK_TOKEN_IS_NOT(TOKEN_START_NULL_TEST); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE); \
         CHECK_TOKEN_IS_NOT(TOKEN_END)
@@ -239,7 +243,7 @@ string Mustache::render() {
 vector<string> Mustache::tokenize(const string& view) {
         std::string::size_type start = 0;
         std::string::size_type prev = 0;
-        std::string::size_type pos = view.length();
+        std::string::size_type pos;
         Tokens tokens;
 
         // TODO(Alessandro Passerini): redundant?
@@ -258,6 +262,9 @@ vector<string> Mustache::tokenize(const string& view) {
                                 } else if (view[pos + 2] == '^') {
                                         tokens.push_back(TOKEN_START_UNLESS);
                                         prev = pos + 3;
+                                } else if (view[pos + 2] == '0') {
+                                        tokens.push_back(TOKEN_START_NULL_TEST);
+                                        prev = pos + 3;
                                 } else if (view[pos + 2] == '/') {
                                         tokens.push_back(TOKEN_START_END_SECTION);
                                         prev = pos + 3;
@@ -266,6 +273,9 @@ vector<string> Mustache::tokenize(const string& view) {
                                         prev = pos + 3;
                                 } else if (view[pos + 2] == '<') {
                                         tokens.push_back(TOKEN_START_TEMPLATE);
+                                        prev = pos + 3;
+                                } else if (view[pos + 2] == '!') {
+                                        tokens.push_back(TOKEN_START_COMMENT);
                                         prev = pos + 3;
                                 } else {
                                         tokens.push_back(TOKEN_START_VARIABLE);
@@ -318,8 +328,17 @@ void Mustache::produceMessage() {
 
                 return;
         }
+        if (IS_TOKEN(TOKEN_START_COMMENT)) {
+                LOG_END("  COMMENT");
+                CONSUME_TOKEN();
+                produceComment();
+                CONSUME_TOKEN();
+                produceMessage();
+
+                return;
+        }
         if (IS_TOKEN(TOKEN_START_BEGIN_SECTION) || IS_TOKEN(TOKEN_START_IF) ||
-            IS_TOKEN(TOKEN_START_UNLESS)) {
+            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_NULL_TEST)) {
                 LOG_END("  SECTION");
                 CONSUME_TOKEN();
                 produceSection();
@@ -393,9 +412,29 @@ void Mustache::produceVariable() {
         LOG_END(TOKEN_END);
 }
 
+void Mustache::produceComment() {
+        LOG_START("COMMENT := ");
+        LOG_END(TOKEN_START_VARIABLE);
+
+        // Token must be (txt)
+        LOG_END("token not empty  ");
+        CHECK_TOKEN_IS_TEXT();
+
+        LOG_END("consume token  ");
+        CONSUME_TOKEN();
+        LOG_END("check token not empty  ");
+        CHECK_TOKEN_NOT_EMPTY();
+        LOG_END("check token is  ");
+        CHECK_TOKEN_IS(TOKEN_END);
+
+        LOG("  ");
+        LOG_END(TOKEN_END);
+}
+
 void Mustache::produceSection() {
         bool useSection = (tokens_.at(currentToken_ - 1) == TOKEN_START_BEGIN_SECTION);
         bool useUnless = (tokens_.at(currentToken_ - 1) == TOKEN_START_UNLESS);
+        bool useNull = (tokens_.at(currentToken_ - 1) == TOKEN_START_NULL_TEST);
 
         LOG_START("");
         LOG_END("SECTION := ");
@@ -404,6 +443,8 @@ void Mustache::produceSection() {
                 LOG_START(TOKEN_START_BEGIN_SECTION);
         } else if (useUnless) {
                 LOG_START(TOKEN_START_UNLESS);
+        } else if (useNull) {
+                LOG_START(TOKEN_START_NULL_TEST);
         } else {
                 LOG_START(TOKEN_START_IF);
         }
@@ -464,8 +505,7 @@ void Mustache::produceSection() {
                 // Reset to 0 after the main cycle
                 currentListCounter_ = 0;
         } else {
-                // The only difference from {{# }} and {{= }} {{^ }} is the fact that
-                // section changes context
+                // The hide variable is used for {{= }} and {{# }} logic
                 bool hide =
                         (variable.is_array() && variable.size() == 0) ||
                         (variable.is_object() && variable.size() == 0) ||
@@ -473,12 +513,21 @@ void Mustache::produceSection() {
                         (variable.is_boolean() && !variable.get<bool>()) ||
                         (variable.is_number() && variable.get<int>() == 0) ||
                         (variable.is_null());
-                // If {{ }}
-                if (useUnless) {
+
+                if (useNull) {
+                        // The null test {{? }} uses a simplified logic
+                        hide = variable.is_null();
+                } else if (useUnless) {
+                        // The inverted section {{^ }} uses inverted logic
                         hide = !hide;
                 }
                 bool oldVisible = visible_;
+
+                // Should the next message be visible?
                 visible_ = visible_ && !hide;
+
+                // The only difference from {{# }} and {{= }} {{^ }} {{? }}
+                // is the fact that tag {{# }} changes context.
                 if (useSection) {
                         stack_.push(variable);
                 }
@@ -486,6 +535,8 @@ void Mustache::produceSection() {
                 if (useSection) {
                         stack_.pop();
                 }
+
+                // Retrieve the old visibility state
                 visible_ = oldVisible;
         }
 
@@ -596,7 +647,7 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
                 }
                 vector<string> pair = split(token, '=');
                 if (pair.size() != 2) {
-                        error("Bad substitution string: too many '=' in " + token);
+                        error("Bad substitution string: missing separator in " + token);
                 }
 
                 VariableConstIterator lb = partialSearchVariable(partialVariables, pair.at(1));
@@ -667,7 +718,7 @@ void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) 
                                 }
 
                                 if (valueToSubstitute[valueToSubstitute.size() - 1 ] != '\'' && valueToSubstitute[valueToSubstitute.size() - 1] != '\"') {
-                                        error("Substitution string " + valueToSubstitute + " should end with apostrophe or double-apostrophe");
+                                        error("Substitution string " + valueToSubstitute + " not properly closed");
                                 }
                                 LOG(" with literal ");
                                 valueToSubstitute = valueToSubstitute.substr(1, valueToSubstitute.size() - 2);

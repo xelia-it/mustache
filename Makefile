@@ -24,7 +24,7 @@ TEST_CPP_FILES := $(wildcard test/src/*.cpp)
 TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
 
 # Generic compiling flags
-CC_FLAGS := -I. -I./src --std=c++11 -fPIC $(DEFS)
+CC_FLAGS := --std=c++11 -fPIC $(DEFS)
 LD_FLAGS := -l$(LIBRARY_NAME) -L.
 
 # Targets

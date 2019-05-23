@@ -1,0 +1,6 @@
+{
+    "header-to-open": "partials/common/doctype",
+    "title": "Template Example",
+    "page-to-open": "partials/common/text",
+    "text": "Content of the page"
+}
