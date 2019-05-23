@@ -44,7 +44,7 @@
 
 // Please download from:
 //   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
-#include <json.hpp>
+#include "../json.hpp"
 // For convenience use a namespace alias
 using json = nlohmann::json;
 
@@ -81,6 +81,7 @@ class RenderException : public std::runtime_error {
 ///   sb = start begin of section = {{#
 ///   se = start end of section = {{/
 ///   si = start if = {{=
+///   sn = start null test = {{?
 ///   su = start unless = {{^
 ///   sp = start partial = {{>
 ///   st = start template = {{<
@@ -88,14 +89,15 @@ class RenderException : public std::runtime_error {
 ///   txt = (sequence of txt)
 ///
 /// Grammar:
-///   MESSAGE  := VARIABLE MESSAGE | SECTION MESSAGE |
-///               IF MESSAGE | UNLESS MESSAGE |
-///               PARTIAL MESSAGE | txt MESSAGE | (empty)
-///   VARIABLE := sv txt ee
-///   IF       := sv txt ee
-///   UNLESS   := sv txt ee
-///   SECTION  := sb txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
-///   PARTIAL  := sp txt ee | st txt ee
+///   MESSAGE   := VARIABLE MESSAGE | SECTION MESSAGE |
+///                IF MESSAGE | UNLESS MESSAGE | NULL_TEST MESSAGE
+///                PARTIAL MESSAGE | txt MESSAGE | (empty)
+///   VARIABLE  := sv txt ee
+///   IF        := si txt ee
+///   NULL_TEST := sn txt ee
+///   UNLESS    := sv txt ee
+///   SECTION   := sb txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
+///   PARTIAL   := sp txt ee | st txt ee
 ///
 class Mustache {
   public:
@@ -115,7 +117,7 @@ class Mustache {
     /// Construct a new Mustache object, using basePath as base partial
     /// search path.
     ///
-    /// @param basePath
+    /// @param
     ///     Base path for file searching. Must be an absolute path.
     ///
     explicit Mustache(const string& basePath);
@@ -179,6 +181,7 @@ class Mustache {
     static const string TOKEN_START_BEGIN_SECTION;
     static const string TOKEN_START_END_SECTION;
     static const string TOKEN_START_IF;
+    static const string TOKEN_START_NULL_TEST;
     static const string TOKEN_START_UNLESS;
     static const string TOKEN_START_PARTIAL;
     static const string TOKEN_START_TEMPLATE;
@@ -211,7 +214,7 @@ class Mustache {
     std::size_t currentListCounter_;
 
     /// Used to manage sections.
-    /// When a block {{#var}} ... {{/var}} is found the parser should
+    /// When a block {{# var }} ... {{/ var }} is found the parser should
     /// iterate inside it.
     stack<json> stack_;
 
@@ -231,6 +234,7 @@ class Mustache {
     void produceSection();
     void produceIf();
     void produceUnless();
+    void produceNullTest();
     void producePartial();
 
     void partialSubstitute(const Tokens partialParams, Tokens& newTokens);

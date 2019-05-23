@@ -38,7 +38,7 @@
 // Please download from:
 //   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
 
-#include <json.hpp>
+#include "../json.hpp"
 using json = nlohmann::json;
 
 #include <iostream>
@@ -66,6 +66,7 @@ const string Mustache::TOKEN_START_VARIABLE = "{{";
 const string Mustache::TOKEN_START_BEGIN_SECTION = "{{#";
 const string Mustache::TOKEN_START_END_SECTION = "{{/";
 const string Mustache::TOKEN_START_IF = "{{=";
+const string Mustache::TOKEN_START_NULL_TEST = "{{0";
 const string Mustache::TOKEN_START_UNLESS = "{{^";
 const string Mustache::TOKEN_START_PARTIAL = "{{>";
 const string Mustache::TOKEN_START_TEMPLATE = "{{<";
@@ -239,7 +240,7 @@ string Mustache::render() {
 vector<string> Mustache::tokenize(const string& view) {
         std::string::size_type start = 0;
         std::string::size_type prev = 0;
-        std::string::size_type pos = view.length();
+        std::string::size_type pos;
         Tokens tokens;
 
         // TODO(Alessandro Passerini): redundant?
@@ -257,6 +258,9 @@ vector<string> Mustache::tokenize(const string& view) {
                                         prev = pos + 3;
                                 } else if (view[pos + 2] == '^') {
                                         tokens.push_back(TOKEN_START_UNLESS);
+                                        prev = pos + 3;
+                                } else if (view[pos + 2] == '0') {
+                                        tokens.push_back(TOKEN_START_NULL_TEST);
                                         prev = pos + 3;
                                 } else if (view[pos + 2] == '/') {
                                         tokens.push_back(TOKEN_START_END_SECTION);
@@ -319,7 +323,7 @@ void Mustache::produceMessage() {
                 return;
         }
         if (IS_TOKEN(TOKEN_START_BEGIN_SECTION) || IS_TOKEN(TOKEN_START_IF) ||
-            IS_TOKEN(TOKEN_START_UNLESS)) {
+            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_NULL_TEST)) {
                 LOG_END("  SECTION");
                 CONSUME_TOKEN();
                 produceSection();
@@ -396,6 +400,7 @@ void Mustache::produceVariable() {
 void Mustache::produceSection() {
         bool useSection = (tokens_.at(currentToken_ - 1) == TOKEN_START_BEGIN_SECTION);
         bool useUnless = (tokens_.at(currentToken_ - 1) == TOKEN_START_UNLESS);
+        bool useNull = (tokens_.at(currentToken_ - 1) == TOKEN_START_NULL_TEST);
 
         LOG_START("");
         LOG_END("SECTION := ");
@@ -404,6 +409,8 @@ void Mustache::produceSection() {
                 LOG_START(TOKEN_START_BEGIN_SECTION);
         } else if (useUnless) {
                 LOG_START(TOKEN_START_UNLESS);
+        } else if (useNull) {
+                LOG_START(TOKEN_START_NULL_TEST);
         } else {
                 LOG_START(TOKEN_START_IF);
         }
@@ -464,8 +471,7 @@ void Mustache::produceSection() {
                 // Reset to 0 after the main cycle
                 currentListCounter_ = 0;
         } else {
-                // The only difference from {{# }} and {{= }} {{^ }} is the fact that
-                // section changes context
+                // The hide variable is used for {{= }} and {{# }} logic
                 bool hide =
                         (variable.is_array() && variable.size() == 0) ||
                         (variable.is_object() && variable.size() == 0) ||
@@ -473,12 +479,22 @@ void Mustache::produceSection() {
                         (variable.is_boolean() && !variable.get<bool>()) ||
                         (variable.is_number() && variable.get<int>() == 0) ||
                         (variable.is_null());
-                // If {{ }}
-                if (useUnless) {
+
+                if (useNull) {
+                        // The null test {{? }} uses a simplified logic
+                        hide = variable.is_null();
+                        std::cout << variable.dump() << std::endl;
+                } else if (useUnless) {
+                        // The inverted section {{^ }} uses inverted logic
                         hide = !hide;
                 }
                 bool oldVisible = visible_;
+
+                // Should the next message be visible?
                 visible_ = visible_ && !hide;
+
+                // The only difference from {{# }} and {{= }} {{^ }} {{? }}
+                // is the fact that tag {{# }} changes context.
                 if (useSection) {
                         stack_.push(variable);
                 }
@@ -486,6 +502,8 @@ void Mustache::produceSection() {
                 if (useSection) {
                         stack_.pop();
                 }
+
+                // Retrieve the old visibility state
                 visible_ = oldVisible;
         }
 
