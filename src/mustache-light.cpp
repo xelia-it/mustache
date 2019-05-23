@@ -328,6 +328,15 @@ void Mustache::produceMessage() {
 
                 return;
         }
+        if (IS_TOKEN(TOKEN_START_COMMENT)) {
+                LOG_END("  COMMENT");
+                CONSUME_TOKEN();
+                produceComment();
+                CONSUME_TOKEN();
+                produceMessage();
+
+                return;
+        }
         if (IS_TOKEN(TOKEN_START_BEGIN_SECTION) || IS_TOKEN(TOKEN_START_IF) ||
             IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_NULL_TEST)) {
                 LOG_END("  SECTION");
@@ -404,15 +413,20 @@ void Mustache::produceVariable() {
 }
 
 void Mustache::produceComment() {
-        LOG_END("VARIABLE := ");
-        LOG_START(TOKEN_START_VARIABLE);
+        LOG_START("COMMENT := ");
+        LOG_END(TOKEN_START_VARIABLE);
 
         // Token must be (txt)
+        LOG_END("token not empty  ");
         CHECK_TOKEN_IS_TEXT();
 
+        LOG_END("consume token  ");
         CONSUME_TOKEN();
+        LOG_END("check token not empty  ");
         CHECK_TOKEN_NOT_EMPTY();
+        LOG_END("check token is  ");
         CHECK_TOKEN_IS(TOKEN_END);
+
         LOG("  ");
         LOG_END(TOKEN_END);
 }

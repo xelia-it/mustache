@@ -33,6 +33,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
+#include <iostream>
 #include <string>
 using std::string;
 
@@ -94,6 +95,17 @@ TEST_CASE("Basic rendering") {
         string html = "VariableVariable";
         string res = m.renderFilenames("basic/two-equal-variables",
                 "basic/two-equal-variables");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Render basic html with empty context") {
+        string html = "\n"
+            "<p>1st Paragraph</p>\n"
+            "\n"
+            "<p>2nd Paragraph</p>\n";
+        string res = m.renderFilenames("basic/comments", "basic/empty");
+        std::cout <<m.error() <<std::endl;
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }
