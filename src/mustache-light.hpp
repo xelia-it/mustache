@@ -82,7 +82,7 @@ class RenderException : public std::runtime_error {
 ///   sb = start begin of section = {{#
 ///   se = start end of section = {{/
 ///   si = start if = {{=
-///   sn = start null test = {{?
+///   s0 = start existing test = {{0
 ///   su = start unless = {{^
 ///   sp = start partial = {{>
 ///   st = start template = {{<
@@ -90,16 +90,16 @@ class RenderException : public std::runtime_error {
 ///   txt = (sequence of txt)
 ///
 /// Grammar:
-///   MESSAGE   := VARIABLE MESSAGE | COMMENT MESSAGE | SECTION MESSAGE |
-///                IF MESSAGE | UNLESS MESSAGE | NULL_TEST MESSAGE
-///                PARTIAL MESSAGE | txt MESSAGE | (empty)
-///   VARIABLE  := sv txt ee
-///   COMMENT   := sc txt ee
-///   IF        := si txt ee
-///   NULL_TEST := sn txt ee
-///   UNLESS    := sv txt ee
-///   SECTION   := sb txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
-///   PARTIAL   := sp txt ee | st txt ee
+///   MESSAGE     := VARIABLE MESSAGE | COMMENT MESSAGE | SECTION MESSAGE |
+///                  IF MESSAGE | UNLESS MESSAGE | EXISTS_TEST MESSAGE |
+///                  PARTIAL MESSAGE | txt MESSAGE | (empty)
+///   VARIABLE    := sv txt ee
+///   COMMENT     := sc txt ee
+///   IF          := si txt ee
+///   EXISTS_TEST := s0 txt ee
+///   UNLESS      := sv txt ee
+///   SECTION     := sb txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
+///   PARTIAL     := sp txt ee | st txt ee
 ///
 class Mustache {
   public:
@@ -184,7 +184,7 @@ class Mustache {
     static const string TOKEN_START_BEGIN_SECTION;
     static const string TOKEN_START_END_SECTION;
     static const string TOKEN_START_IF;
-    static const string TOKEN_START_NULL_TEST;
+    static const string TOKEN_START_EXISTS_TEST;
     static const string TOKEN_START_UNLESS;
     static const string TOKEN_START_PARTIAL;
     static const string TOKEN_START_TEMPLATE;
@@ -258,9 +258,22 @@ class Mustache {
     void error(const string& message);
 
     /// Variable get in the current context
-    /// TODO: refactor name..
-    json searchContext(const string& key);
+    ///
+    /// @param key
+    ///     The key to serch in the current context.
+    ///
+    /// @returns
+    ///     The value of the corresponding key (as json object)
+    ///
+    /// @throws std::out_of_range
+    ///     If the context is an array and the index is out of bounds.
+    /// @throws std::invalid_argument
+    ///     If the the key is not found in the key.
+    ///
+    json searchVariableInContext(const string& key);
 
+
+    string getTemplateNameFromContext(const string& key);
 
     /// A valid identifier <em>must</em> contain only lowercase characters,
     /// decimal digits and minus (-). No space or other characters allowed.
