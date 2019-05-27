@@ -34,6 +34,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 
+#include <iostream>
 #include <string>
 using std::string;
 
@@ -60,6 +61,7 @@ TEST_CASE("Logic operators") {
                 "\n"
                 "<p>no is false</p>\n";
         string res = m.renderFilenames("logic/logic", "logic/logic");
+        std::cout << m.error() << std::endl;
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }

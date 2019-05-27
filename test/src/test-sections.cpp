@@ -100,23 +100,33 @@ TEST_CASE("Sections") {
         REQUIRE(m.error().empty());
     }
 
-    SECTION("Section with null values") {
-        string html = "<p>A simple string</p>\n"
-                      "<p></p>\n"
-                      "<p>0</p>\n"
-                      "<p>0.0</p>\n"
-                      "<p>23</p>\n"
-                      "<p>23.02</p>\n"
-                      "<p>true</p>\n"
-                      "<p></p>\n"
-                      "\n"
-                      "<p></p>\n"
-                      "<p></p>\n"
-                      "\n"
-                      "<p></p>\n"
-                      "<p></p>\n";
-        string res = m.renderFilenames("sections/sections-null-test",
-                                       "sections/sections-null-test");
+    SECTION("Section with not existing keys") {
+        string html = "Simple string: <p>A simple string</p>\n"
+                      "Empty string: <p></p>\n"
+                      "Zero integer: <p>0</p>\n"
+                      "Zero float: <p>0.0</p>\n"
+                      "Number integer: <p>23</p>\n"
+                      "Number float: <p>23.02</p>\n"
+                      "Boolean true: <p>true</p>\n"
+                      "Boolean false: <p></p>\n"
+                      "Null: <p></p>\n"
+                      "Object empty: <p></p>\n"
+                      "Object full: <p></p>\n"
+                      "Array empty: <p></p>\n"
+                      "Array full: <p></p>\n"
+                      "Not existing: \n";
+        string res = m.renderFilenames("sections/sections-exists-test",
+                                       "sections/sections-exists-test");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Section with not existing index") {
+        string html = "Array index 0: <p>John</p>\n"
+                      "Array index 1: <p>Maggie</p>\n"
+                      "Array index 2: \n";
+        string res = m.renderFilenames("sections/sections-exists-test-array",
+                                       "sections/sections-exists-test-array");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }

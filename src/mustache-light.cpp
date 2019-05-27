@@ -60,14 +60,14 @@ using std::vector;
 namespace mustache {
 
 const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@[]";
-const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().\"' \n\r";
+const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,!\"' \n\r";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
 const string Mustache::TOKEN_START_COMMENT = "{{!";
 const string Mustache::TOKEN_START_BEGIN_SECTION = "{{#";
 const string Mustache::TOKEN_START_END_SECTION = "{{/";
 const string Mustache::TOKEN_START_IF = "{{=";
-const string Mustache::TOKEN_START_NULL_TEST = "{{0";
+const string Mustache::TOKEN_START_EXISTS_TEST = "{{0";
 const string Mustache::TOKEN_START_UNLESS = "{{^";
 const string Mustache::TOKEN_START_PARTIAL = "{{>";
 const string Mustache::TOKEN_START_TEMPLATE = "{{<";
@@ -123,7 +123,7 @@ const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
         CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_IF); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS); \
-        CHECK_TOKEN_IS_NOT(TOKEN_START_NULL_TEST); \
+        CHECK_TOKEN_IS_NOT(TOKEN_START_EXISTS_TEST); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL); \
         CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE); \
         CHECK_TOKEN_IS_NOT(TOKEN_END)
@@ -263,7 +263,7 @@ vector<string> Mustache::tokenize(const string& view) {
                                         tokens.push_back(TOKEN_START_UNLESS);
                                         prev = pos + 3;
                                 } else if (view[pos + 2] == '0') {
-                                        tokens.push_back(TOKEN_START_NULL_TEST);
+                                        tokens.push_back(TOKEN_START_EXISTS_TEST);
                                         prev = pos + 3;
                                 } else if (view[pos + 2] == '/') {
                                         tokens.push_back(TOKEN_START_END_SECTION);
@@ -338,7 +338,7 @@ void Mustache::produceMessage() {
                 return;
         }
         if (IS_TOKEN(TOKEN_START_BEGIN_SECTION) || IS_TOKEN(TOKEN_START_IF) ||
-            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_NULL_TEST)) {
+            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_EXISTS_TEST)) {
                 LOG_END("  SECTION");
                 CONSUME_TOKEN();
                 produceSection();
@@ -385,9 +385,16 @@ void Mustache::produceVariable() {
         LOG(" ");
         LOG(variableName);
         if (visible_) {
-                json variable = searchContext(variableName);
+            json variable;
+            try {
+                variable = searchVariableInContext(variableName);
+            } catch(const std::out_of_range& ex) {
+                variable = nullptr;
+            } catch(const std::invalid_argument& ex) {
+                variable = nullptr;
+            }
 
-                if (variable.is_primitive()) {
+            if (variable.is_primitive()) {
                         if (variable.is_null()) {
                                 // OK
                         } else if (variable.is_boolean()) {
@@ -434,7 +441,7 @@ void Mustache::produceComment() {
 void Mustache::produceSection() {
         bool useSection = (tokens_.at(currentToken_ - 1) == TOKEN_START_BEGIN_SECTION);
         bool useUnless = (tokens_.at(currentToken_ - 1) == TOKEN_START_UNLESS);
-        bool useNull = (tokens_.at(currentToken_ - 1) == TOKEN_START_NULL_TEST);
+        bool useExistsTest = (tokens_.at(currentToken_ - 1) == TOKEN_START_EXISTS_TEST);
 
         LOG_START("");
         LOG_END("SECTION := ");
@@ -443,8 +450,8 @@ void Mustache::produceSection() {
                 LOG_START(TOKEN_START_BEGIN_SECTION);
         } else if (useUnless) {
                 LOG_START(TOKEN_START_UNLESS);
-        } else if (useNull) {
-                LOG_START(TOKEN_START_NULL_TEST);
+        } else if (useExistsTest) {
+                LOG_START(TOKEN_START_EXISTS_TEST);
         } else {
                 LOG_START(TOKEN_START_IF);
         }
@@ -458,15 +465,26 @@ void Mustache::produceSection() {
         ensureValidIdentifier(variableName);
         LOG(" ");
         LOG(variableName);
-        json variable = searchContext(variableName);
 
-        // Is a correct type?
+        json variable;
+        bool variable_exists;
+        try {
+            variable = searchVariableInContext(variableName);
+            variable_exists = true;
+        } catch(const std::out_of_range& ex) {
+            variable = nullptr;
+            variable_exists = false;
+        } catch(const std::invalid_argument& ex) {
+            variable = nullptr;
+            variable_exists = false;
+        }
+
+        // Is variable malformed
         bool isCorrectType = variable.is_null() || variable.is_boolean() ||
                              variable.is_string() || variable.is_array() ||
                              variable.is_object() || variable.is_number();
         if (!isCorrectType) {
-                error("Variable '" + variableName + "' must be a boolean, a string, "
-                      "an array, an object or a null value");
+                error("Variable '" + variableName + "' is malformed");
                 return;
         }
 
@@ -514,9 +532,10 @@ void Mustache::produceSection() {
                         (variable.is_number() && variable.get<int>() == 0) ||
                         (variable.is_null());
 
-                if (useNull) {
-                        // The null test {{? }} uses a simplified logic
-                        hide = variable.is_null();
+                if (useExistsTest) {
+                        // The exist test {{0 }} uses a different logic:
+                        // If the key do not exists the section is not shown.
+                        hide = !variable_exists;
                 } else if (useUnless) {
                         // The inverted section {{^ }} uses inverted logic
                         hide = !hide;
@@ -597,14 +616,7 @@ void Mustache::producePartial() {
         string fileToRead;
         if (useTemplate) {
                 LOG_END("  Use template");
-                json var = searchContext(splitted.at(0));
-                if (var.is_null()) {
-                        error("Missing template variable: " + splitted.at(0));
-                } else if (var.is_string()) {
-                        fileToRead = searchContext(splitted.at(0)).get<string>();
-                } else {
-                        error("Wrong template variable type: " + splitted.at(0) + " must be a string");
-                }
+                fileToRead = getTemplateNameFromContext(splitted.at(0));
         } else {
                 LOG_END("  Use normal partial");
                 fileToRead = splitted.at(0);
@@ -757,7 +769,7 @@ void Mustache::error(const string& message) {
         throw RenderException(message);
 }
 
-json Mustache::searchContext(const string& key) {
+json Mustache::searchVariableInContext(const string& key) {
         // TODO: better to use a constant
         if (key == "@index") {
                 json value = currentListCounter_;
@@ -797,7 +809,8 @@ json Mustache::searchContext(const string& key) {
         json::const_iterator it = top.find(newKey);
         if (it == top.end()) {
                 LOG_END("NOT FOUND:");
-                return "null"_json;
+                throw std::invalid_argument("Variable " + key + " not found");
+                // return "null"_json;
         } else if (index == std::string::npos) {
                 LOG_END("NORMAL USE *it:");
                 json value = *it;
@@ -809,7 +822,8 @@ json Mustache::searchContext(const string& key) {
                     LOG_END("USE ARRAY:");
                     if (index >= it->size()) {
                       LOG_END("OUT OF RANGE:");
-                      return "null"_json;
+                      throw std::out_of_range("Index " + std::to_string(index) + " is out of range");
+                      // return "null"_json;
                     } else {
                       LOG_END("IN RANGE:");
                     }
@@ -817,6 +831,26 @@ json Mustache::searchContext(const string& key) {
                 json value = (*it)[index];
                 return value;
         }
+}
+
+string Mustache::getTemplateNameFromContext(const string& key)
+{
+    json variable;
+    try {
+        variable = searchVariableInContext(key);
+    } catch(const std::out_of_range& ex) {
+        variable = nullptr;
+    } catch(const std::invalid_argument& ex) {
+        variable = nullptr;
+    }
+
+    if (variable.is_null()) {
+        error("Missing template variable: " + key);
+    } else if (!variable.is_string()) {
+        error("Wrong template variable type: " + key + " must be a string");
+    }
+
+    return variable.get<string>();
 }
 
 Mustache::VariableConstIterator Mustache::partialSearchVariable(const Mustache::Variables& variables,

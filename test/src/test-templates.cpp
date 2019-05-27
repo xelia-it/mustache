@@ -67,6 +67,34 @@ TEST_CASE("Templates") {
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
     }
+    SECTION("Template file do not exists") {
+        string html = "<!DOCTYPE html>\n"
+            "<html>\n"
+            "    <head>\n"
+            "        <title>Template Example</title>\n"
+            "    </head>\n"
+            "    <body>\n"
+            "        <h1>Template Example</h1>\n"
+            "\n"
+            "        <table>\n"
+            "        <tbody>\n"
+            "        ";
+
+        string res = m.renderFilenames("templates/basic-template",
+                                       "templates/not-existing-template");
+
+        REQUIRE(res == html);
+        REQUIRE(m.error() == "Cannot open file: ./test/fixtures/do-not-exists.mustache");
+    }
+
+    SECTION("Template variable do not exists") {
+        string html = "";
+        string res = m.renderFilenames("templates/basic-template",
+                                       "basic/empty");
+
+        REQUIRE(res == html);
+        REQUIRE(m.error() == "Missing template variable: header-to-open");
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
