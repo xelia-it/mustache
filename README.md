@@ -30,9 +30,9 @@ Now you can link mustache.so with your C++ source code.
 ## Implemented standard commands
 
 * ``{{ var }}`` - Variable substitution
-* ``{{# var }} {{\ var }} - Sections (repeated blocks)
-* ``{{^ var }} {{\ var }} - Inverted Sections
-* ``{{> partial }} - Partials
+* ``{{# var }} {{\ var }}`` - Sections (repeated blocks)
+* ``{{^ var }} {{\ var }}`` - Inverted Sections
+* ``{{> partial }}`` - Partials
 
 ## Unimplemented commands
 
@@ -43,19 +43,20 @@ Now you can link mustache.so with your C++ source code.
 
 ## Not-standard commands
 
-``{{< partial }} - Templates
+``{{< partial }}`` - Templates
 
 Like partials but takes partial to open from a variable.
 
-``{{= var }} {{\ var }}`` - Exists tests
+``{{= var }} {{\ var }}`` - Empty test
 
 Like sections but *do not change context*.
+It's used to check if a variable is empty.
+
+``{{0 var }} {{\ var }}`` - Existance tests
+
 It's used to check if a variable exists.
-
-``{{0 var }} {{\ var }}`` - Null tests
-
-Like sections but *do not change context*.
-It's used to check if a variable is null.
+Compared to ``{{= }}`` and ``{{# }}`` it checks the *keys* of the json
+objects instead of the *values*. If the key exists it renders the section.
 
 ## See also
 
