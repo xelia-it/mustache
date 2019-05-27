@@ -56,6 +56,8 @@ using json = nlohmann::json;
 using std::cout;
 using std::endl;
 using std::vector;
+using std::string;
+using std::map;
 
 namespace mustache {
 

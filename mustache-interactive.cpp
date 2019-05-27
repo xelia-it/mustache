@@ -41,6 +41,7 @@
 
 using std::cout;
 using std::endl;
+using std::string;
 
 using namespace mustache;
 // for convenience

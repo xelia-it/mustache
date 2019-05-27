@@ -36,6 +36,9 @@
 #include <string>
 using std::string;
 
+#include "../../json.hpp"
+using nlohmann::json;
+
 #include "../../catch.hpp"
 
 #include "../../src/mustache-light.hpp"
