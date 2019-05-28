@@ -529,7 +529,7 @@ void Mustache::produceSection() {
                 bool hide =
                         (variable.is_array() && variable.size() == 0) ||
                         (variable.is_object() && variable.size() == 0) ||
-                        (variable.is_string() && variable.size() == 0) ||
+                        (variable.is_string() && variable.get<string>().size() == 0) ||
                         (variable.is_boolean() && !variable.get<bool>()) ||
                         (variable.is_number() && variable.get<int>() == 0) ||
                         (variable.is_null());
