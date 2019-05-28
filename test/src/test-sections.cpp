@@ -121,11 +121,63 @@ TEST_CASE("Sections") {
         REQUIRE(m.error().empty());
     }
 
+    // The JSON used for test is:
+    //
+    // {
+    //     "names": [
+    //         "John",
+    //         "",
+    //         23,
+    //         0,
+    //         45.7,
+    //         0.0,
+    //         { "name": "Margot" },
+    //         {},
+    //         [ 1, 2, 7 ],
+    //         [],
+    //         true,
+    //         false,
+    //         null
+    //     ]
+    // }
+
     SECTION("Section with not existing index") {
-        string html = "Array index 0: <p>John</p>\n"
-                      "Array index 1: <p>Maggie</p>\n"
-                      "Array index 2: \n";
+        string html = "Array index  0: <p>John</p>\n"
+                      "Array index  1: <p></p>\n"
+                      "Array index  2: <p>23</p>\n"
+                      "Array index  3: <p>0</p>\n"
+                      "Array index  4: <p>45.7</p>\n"
+                      "Array index  5: <p>0.0</p>\n"
+                      "Array index  6: <p></p>\n"
+                      "Array index  7: <p></p>\n"
+                      "Array index  8: <p></p>\n"
+                      "Array index  9: <p></p>\n"
+                      "Array index 10: <p>true</p>\n"
+                      "Array index 11: <p></p>\n"
+                      "Array index 12: <p></p>\n"
+                      "Array index not exists: \n";
         string res = m.renderFilenames("sections/sections-exists-test-array",
+                                       "sections/sections-exists-test-array");
+        REQUIRE(res == html);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Compare exists test with value test") {
+        string html = "Array index  0: <p>John</p>\n"
+                      "Array index  1: \n"
+                      "Array index  2: <p>23</p>\n"
+                      "Array index  3: \n"
+                      "Array index  4: <p>45.7</p>\n"
+                      "Array index  5: \n"
+                      "Array index  6: <p></p>\n"
+                      "Array index  7: \n"
+                      "Array index  8: <p></p>\n"
+                      "Array index  9: \n"
+                      "Array index 10: <p>true</p>\n"
+                      "Array index 11: \n"
+                      "Array index 12: \n"
+                      "Array index not exists: \n";
+        string res = m.renderFilenames("sections/sections-exists-test-vs-value-test",
                                        "sections/sections-exists-test-array");
         REQUIRE(res == html);
         REQUIRE(m.error().empty());
