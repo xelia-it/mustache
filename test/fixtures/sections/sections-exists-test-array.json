@@ -1,6 +1,17 @@
 {
     "names": [
-        { "name": "John" },
-        { "name": "Maggie" }
+        "John",
+        "",
+        23,
+        0,
+        45.7,
+        0.0,
+        { "name": "Margot" },
+        {},
+        [ 1, 2, 7 ],
+        [],
+        true,
+        false,
+        null
     ]
 }

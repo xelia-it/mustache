@@ -56,6 +56,8 @@ using json = nlohmann::json;
 using std::cout;
 using std::endl;
 using std::vector;
+using std::string;
+using std::map;
 
 namespace mustache {
 
@@ -527,7 +529,7 @@ void Mustache::produceSection() {
                 bool hide =
                         (variable.is_array() && variable.size() == 0) ||
                         (variable.is_object() && variable.size() == 0) ||
-                        (variable.is_string() && variable.size() == 0) ||
+                        (variable.is_string() && variable.get<string>().size() == 0) ||
                         (variable.is_boolean() && !variable.get<bool>()) ||
                         (variable.is_number() && variable.get<int>() == 0) ||
                         (variable.is_null());
@@ -810,7 +812,6 @@ json Mustache::searchVariableInContext(const string& key) {
         if (it == top.end()) {
                 LOG_END("NOT FOUND:");
                 throw std::invalid_argument("Variable " + key + " not found");
-                // return "null"_json;
         } else if (index == std::string::npos) {
                 LOG_END("NORMAL USE *it:");
                 json value = *it;
@@ -823,7 +824,6 @@ json Mustache::searchVariableInContext(const string& key) {
                     if (index >= it->size()) {
                       LOG_END("OUT OF RANGE:");
                       throw std::out_of_range("Index " + std::to_string(index) + " is out of range");
-                      // return "null"_json;
                     } else {
                       LOG_END("IN RANGE:");
                     }

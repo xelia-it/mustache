@@ -45,13 +45,6 @@
 // Please download from:
 //   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
 #include "../json.hpp"
-// For convenience use a namespace alias
-using json = nlohmann::json;
-
-using std::string;
-using std::vector;
-using std::map;
-using std::stack;
 
 namespace mustache {
 
@@ -71,7 +64,7 @@ class RenderException : public std::runtime_error {
     /// @param what
     ///      Error message
     ///
-    explicit RenderException(const string& what) :
+    explicit RenderException(const std::string& what) :
             std::runtime_error(what) {
     }
 };
@@ -108,11 +101,11 @@ class Mustache {
     // Some types (useful for readability purposes)
     // basically we uses sting and string containers.
 
-    typedef map<string, string> Variables;
+    typedef std::map<std::string, std::string> Variables;
     typedef Variables::iterator VariableIterator;
     typedef Variables::const_iterator VariableConstIterator;
-    typedef string Token;
-    typedef vector<Token> Tokens;
+    typedef std::string Token;
+    typedef std::vector<Token> Tokens;
     // typedef Tokens::iterator TokenIterator;
     typedef long unsigned int TokenIndex;
 
@@ -122,7 +115,7 @@ class Mustache {
     /// @param
     ///     Base path for file searching. Must be an absolute path.
     ///
-    explicit Mustache(const string& basePath);
+    explicit Mustache(const std::string& basePath);
 
     /// Construct a new Mustache object, using basePath as base partial
     /// search path.
@@ -132,7 +125,7 @@ class Mustache {
     /// @param partialExtension
     ///     Default extension for partials.
     ///
-    Mustache(const string& basePath, const string& partialExtension);
+    Mustache(const std::string& basePath, const std::string& partialExtension);
 
     /// Destructor for Mustache object.
     ~Mustache();
@@ -142,12 +135,12 @@ class Mustache {
     /// @param view
     ///      The HTML file with {{ ... }} tags
     /// @param context
-    ///      The context (Eg: a string containing JSON data)
+    ///      The context (Eg: a std::string containing JSON data)
     ///
     /// @return
     ///     The rendered template.
     ///
-    string render(const string& view, const string& context);
+    std::string render(const std::string& view, const std::string& context);
 
     /// Renders a template.
     ///
@@ -159,56 +152,56 @@ class Mustache {
     /// @return
     ///     The rendered template.
     ///
-    string render(const string& view, const json& context);
+    std::string render(const std::string& view, const nlohmann::json& context);
 
-    /// Returns error message (if any) or a blank string if no error occured.
+    /// Returns error message (if any) or a blank std::string if no error occured.
     ///
     /// @return
     ///      The error message.
     ///
-    string error() const;
+    std::string error() const;
 
-    string renderFilenames(const string& viewFileName, const string& contextFileName);
+    std::string renderFilenames(const std::string& viewFileName, const std::string& contextFileName);
 
-    string fileRead(const string& fileName, const string& fileExtension);
-    string fileRead(const string& fileName);
+    std::string fileRead(const std::string& fileName, const std::string& fileExtension);
+    std::string fileRead(const std::string& fileName);
 
   private:
     /// List of valid characters for an identifier.
-    static const string VALID_CHARS_FOR_ID;
+    static const std::string VALID_CHARS_FOR_ID;
 
     /// List of all valid characters for partial tag.
-    static const string VALID_CHARS_FOR_PARTIALS;
-    static const string TOKEN_START_VARIABLE;
-    static const string TOKEN_START_COMMENT;
-    static const string TOKEN_START_BEGIN_SECTION;
-    static const string TOKEN_START_END_SECTION;
-    static const string TOKEN_START_IF;
-    static const string TOKEN_START_EXISTS_TEST;
-    static const string TOKEN_START_UNLESS;
-    static const string TOKEN_START_PARTIAL;
-    static const string TOKEN_START_TEMPLATE;
-    static const string TOKEN_END;
-    static const string DEFAULT_PARTIAL_EXTENSION;
+    static const std::string VALID_CHARS_FOR_PARTIALS;
+    static const std::string TOKEN_START_VARIABLE;
+    static const std::string TOKEN_START_COMMENT;
+    static const std::string TOKEN_START_BEGIN_SECTION;
+    static const std::string TOKEN_START_END_SECTION;
+    static const std::string TOKEN_START_IF;
+    static const std::string TOKEN_START_EXISTS_TEST;
+    static const std::string TOKEN_START_UNLESS;
+    static const std::string TOKEN_START_PARTIAL;
+    static const std::string TOKEN_START_TEMPLATE;
+    static const std::string TOKEN_END;
+    static const std::string DEFAULT_PARTIAL_EXTENSION;
 
     /// Base path is added to file name each time a file must be opened.
-    string basePath_;
+    std::string basePath_;
 
-    string partialExtension_;
+    std::string partialExtension_;
 
     /// The HTML template containing tags to evaluate {{ ... }}
-    string view_;
+    std::string view_;
 
     /// The context
-    string context_;
+    std::string context_;
 
-    json data_;
+    nlohmann::json data_;
 
     /// Stores render result
-    string rendered_;
+    std::string rendered_;
 
     /// Stores error message
-    string error_;
+    std::string error_;
 
     Tokens tokens_;
 
@@ -219,17 +212,17 @@ class Mustache {
     /// Used to manage sections.
     /// When a block {{# var }} ... {{/ var }} is found the parser should
     /// iterate inside it.
-    stack<json> stack_;
+    std::stack<nlohmann::json> stack_;
 
     /// Used to hide/view a section
     bool visible_;
 
     /// Starts the rendering process.
     /// This is the first method called after parameter read.
-    string render();
+    std::string render();
 
     /// Used for debugging purposes
-    Tokens tokenize(const string& view);
+    Tokens tokenize(const std::string& view);
 
     // Productions
     void produceMessage();
@@ -252,10 +245,10 @@ class Mustache {
     ///                       or variable_.end() if nothing is found.
     ///
     VariableConstIterator partialSearchVariable(const Variables& variables,
-        const string& valueToSearch);
+        const std::string& valueToSearch);
 
     /// Throws an exception and stops rendering.
-    void error(const string& message);
+    void error(const std::string& message);
 
     /// Variable get in the current context
     ///
@@ -270,23 +263,22 @@ class Mustache {
     /// @throws std::invalid_argument
     ///     If the the key is not found in the key.
     ///
-    json searchVariableInContext(const string& key);
+    nlohmann::json searchVariableInContext(const std::string& key);
 
-
-    string getTemplateNameFromContext(const string& key);
+    std::string getTemplateNameFromContext(const std::string& key);
 
     /// A valid identifier <em>must</em> contain only lowercase characters,
     /// decimal digits and minus (-). No space or other characters allowed.
     ///
     /// @param id
-    ///     The string to check.
+    ///     The std::string to check.
     ///
     /// @throws RenderError
     ///     If the identifier is not valid.
-    void ensureValidIdentifier(const string& id, const string& validChars = VALID_CHARS_FOR_ID);
+    void ensureValidIdentifier(const std::string& id, const std::string& validChars = VALID_CHARS_FOR_ID);
 
-    vector<string>& split(const string &s, char delim, vector<string> &elems);
-    vector<string> split(const string &s, char delim);
+    std::vector<std::string>& split(const std::string &s, char delim, std::vector<std::string> &elems);
+    std::vector<std::string> split(const std::string &s, char delim);
 
 #ifdef DEBUG
     // Dump tokens.
@@ -297,16 +289,16 @@ class Mustache {
 #endif
 
     // trim from start
-    string& ltrim(string& s);
+    std::string& ltrim(std::string& s);
 
     // trim from end
-    string &rtrim(string& s);
+    std::string &rtrim(std::string& s);
 
     // trim from both ends
-    string& trim(string& s);
+    std::string& trim(std::string& s);
 
     // Escapes dangerous characters
-    void htmlEscape(string& stringToEscape);
+    void htmlEscape(std::string& stringToEscape);
 
     // Disallow default constructor, copy constructor and assign operator
     Mustache();
