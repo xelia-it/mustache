@@ -2,6 +2,8 @@
 
 The mustache library is a *mustache-inspired* templace engine written in C++11.
 
+This is a _pre-release_ version: until version 1.0 breaking changes are possible.
+
 ## Requirements
 
 It requires:
@@ -12,12 +14,12 @@ It requires:
 ## Installation
 
 Download json.hpp from nlhomann from here:
-https://github.com/nlohmann/json/tree/develop/single_include/nlohmannom
+https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
 and put it into project root folder.
 
 Download Catch2 from here:
 https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp
-and put it into test/src folder.
+and put it into project root folder.
 
 Then type:
 ```
@@ -57,6 +59,13 @@ It's used to check if a variable is empty.
 It's used to check if a variable exists.
 Compared to ``{{= }}`` and ``{{# }}`` it checks the *keys* of the json
 objects instead of the *values*. If the key exists it renders the section.
+
+``{{ array[index] }}`` - Array element selection
+
+Prints an element of the array.
+I works also for sections. Eg: you can evaluate an array element using:
+``{{# array[index] }}``, ``{{^ array[index] }}``, ``{{= array[index] }}``
+or ``{{0 array[index] }}``.
 
 ## See also
 
