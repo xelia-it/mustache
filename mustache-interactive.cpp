@@ -38,6 +38,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <chrono>
 
 using std::cout;
 using std::endl;
@@ -68,7 +69,11 @@ int main(int argc, char *argv[]) {
     cout << "Open context file: " << context << endl;
 
     Mustache m("./test/fixtures/");
-    string rendered = m.render(m.fileRead(view), m.fileRead(context, "json"));
+    string rendered;
+
+    std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+    rendered = m.render(m.fileRead(view), m.fileRead(context, "json"));
+    std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
 
     cout << "Rendered:" << endl
             << "------------------------------------------------------" << endl
@@ -80,6 +85,7 @@ int main(int argc, char *argv[]) {
                 << error << endl
                 << "------------------------------------------------------" << endl;
     }
+    cout << "Elapsed = " << std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count() << " us" << endl;
 
     return 0;
 }

@@ -65,6 +65,7 @@ const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghi
 const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,!\"' \n\r";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
+const string Mustache::TOKEN_START_VARIABLE_UNESCAPED = "{{{";
 const string Mustache::TOKEN_START_COMMENT = "{{!";
 const string Mustache::TOKEN_START_BEGIN_SECTION = "{{#";
 const string Mustache::TOKEN_START_END_SECTION = "{{/";
@@ -74,6 +75,7 @@ const string Mustache::TOKEN_START_UNLESS = "{{^";
 const string Mustache::TOKEN_START_PARTIAL = "{{>";
 const string Mustache::TOKEN_START_TEMPLATE = "{{<";
 const string Mustache::TOKEN_END = "}}";
+const string Mustache::TOKEN_END_UNESCAPED = "}}}";
 
 const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
 
@@ -280,8 +282,13 @@ vector<string> Mustache::tokenize(const string& view) {
                                         tokens.push_back(TOKEN_START_COMMENT);
                                         prev = pos + 3;
                                 } else {
-                                        tokens.push_back(TOKEN_START_VARIABLE);
-                                        prev = pos + 2;
+                                        if (view[pos + 2] == '{') {
+                                                tokens.push_back(TOKEN_START_VARIABLE_UNESCAPED);
+                                                prev = pos + 3;
+                                        } else {
+                                                tokens.push_back(TOKEN_START_VARIABLE);
+                                                prev = pos + 2;
+                                        }
                                 }
                                 start = prev;
                         } else {
@@ -296,8 +303,13 @@ vector<string> Mustache::tokenize(const string& view) {
                                 token = trim(token);
                                 // Now save both token and closed parenthesis "}}"
                                 tokens.push_back(token);
-                                tokens.push_back(TOKEN_END);
-                                prev = pos + 2;
+                                if (view[pos + 2] == '}') {
+                                        tokens.push_back(TOKEN_END_UNESCAPED);
+                                        prev = pos + 3;
+                                } else {
+                                        tokens.push_back(TOKEN_END);
+                                        prev = pos + 2;
+                                }
                                 start = prev;
                         } else {
                                 // Single close }: continue..
@@ -325,6 +337,15 @@ void Mustache::produceMessage() {
                 LOG_END("  VARIABLE");
                 CONSUME_TOKEN();
                 produceVariable();
+                CONSUME_TOKEN();
+                produceMessage();
+
+                return;
+        }
+        if (IS_TOKEN(TOKEN_START_VARIABLE_UNESCAPED)) {
+                LOG_END("  VARIABLE UNESCAPED");
+                CONSUME_TOKEN();
+                produceVariableUnescaped();
                 CONSUME_TOKEN();
                 produceMessage();
 
@@ -375,50 +396,75 @@ void Mustache::produceMessage() {
         produceMessage();
 }
 
-void Mustache::produceVariable() {
-        LOG_END("VARIABLE := ");
+void Mustache::produceVariable()
+{
+        LOG("VARIABLE := ");
         LOG_START(TOKEN_START_VARIABLE);
 
         // Token must be (txt)
         CHECK_TOKEN_IS_TEXT();
 
-        const string& variableName = tokens_.at(currentToken_);
-        ensureValidIdentifier(variableName);
-        LOG(" ");
-        LOG(variableName);
-        if (visible_) {
-            json variable;
-            try {
-                variable = searchVariableInContext(variableName);
-            } catch(const std::out_of_range& ex) {
-                variable = nullptr;
-            } catch(const std::invalid_argument& ex) {
-                variable = nullptr;
-            }
-
-            if (variable.is_primitive()) {
-                        if (variable.is_null()) {
-                                // OK
-                        } else if (variable.is_boolean()) {
-                                if (variable.get<bool>()) {
-                                        rendered_.append("true");
-                                }
-                        } else if (variable.is_string()) {
-                                string toBeAppended = variable.get<string>();
-                                htmlEscape(toBeAppended);
-                                rendered_.append(toBeAppended);
-                        } else {
-                                rendered_.append(variable.dump());
-                        }
-                }
-        }
-        // else skip render invisible parts
+        printVariable(true);
 
         CONSUME_TOKEN();
         CHECK_TOKEN_NOT_EMPTY();
         CHECK_TOKEN_IS(TOKEN_END);
         LOG("  ");
         LOG_END(TOKEN_END);
+}
+
+void Mustache::produceVariableUnescaped()
+{
+        LOG("VARIABLE_UNESCAPED := ");
+        LOG_START(TOKEN_START_VARIABLE_UNESCAPED);
+
+        // Token must be (txt)
+        CHECK_TOKEN_IS_TEXT();
+
+        printVariable(false);
+
+        CONSUME_TOKEN();
+        CHECK_TOKEN_NOT_EMPTY();
+        CHECK_TOKEN_IS(TOKEN_END_UNESCAPED);
+        LOG("  ");
+        LOG_END(TOKEN_END_UNESCAPED);
+}
+
+void Mustache::printVariable(bool escape_html)
+{
+    const string& variable_name = tokens_.at(currentToken_);
+    ensureValidIdentifier(variable_name);
+    LOG(" ");
+    LOG(variable_name);
+    if (visible_) {
+        json variable;
+        try {
+            variable = searchVariableInContext(variable_name);
+        } catch(const std::out_of_range& ex) {
+            variable = nullptr;
+        } catch(const std::invalid_argument& ex) {
+            variable = nullptr;
+        }
+
+        if (variable.is_primitive()) {
+            if (variable.is_null()) {
+                // OK
+            } else if (variable.is_boolean()) {
+                if (variable.get<bool>()) {
+                    rendered_.append("true");
+                }
+            } else if (variable.is_string()) {
+                string to_be_appended = variable.get<string>();
+                if (escape_html) {
+                    htmlEscape(to_be_appended);
+                }
+                rendered_.append(to_be_appended);
+            } else {
+                rendered_.append(variable.dump());
+            }
+        }
+    }
+    // else skip render invisible parts
 }
 
 void Mustache::produceComment() {
