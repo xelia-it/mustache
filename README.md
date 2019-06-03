@@ -31,19 +31,19 @@ Now you can link mustache.so with your C++ source code.
 
 ## Implemented standard commands
 
-* ``{{ var }}`` - Variable substitution
+* ``{{ var }}`` - Variable substitution (escaped)
+* ``{{{ var }}}`` - Variable substitution (unescaped)
 * ``{{# var }} {{\ var }}`` - Sections (repeated blocks)
 * ``{{^ var }} {{\ var }}`` - Inverted Sections
 * ``{{> partial }}`` - Partials
-
-## Unimplemented commands
-
 * ``{{! comment }}`` - Comments
-* ``{{{ var }}}`` - Unescaped variable substitution
+
+## Not implemented commands
+
 * Lambdas
 * Set Delimiters
 
-## Not-standard commands
+## Non-standard commands
 
 ``{{< partial }}`` - Templates
 

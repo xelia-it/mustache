@@ -48,30 +48,48 @@ TEST_CASE("Escape") {
     Mustache m("./test/fixtures/");
 
     SECTION("Escape HTML tags") {
-        string html = "<p>&lt;div&gt;to be escaped&lt;/div&gt;</p>";
+        string expected = "<p>&lt;div&gt;to be escaped&lt;/div&gt;</p>";
         string view = "<p>{{name}}</p>";
         string context = "{ \"name\": \"<div>to be escaped</div>\" }";
         string res = m.render(view, context);
-        REQUIRE(res == html);
+        REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }
 
     SECTION("Escape harmful chars") {
-        string html = "<p>&quot;Tom&quot; &amp; &quot;Jerry&quot; - &apos;The new adventures&apos;</p>";
+        string expected = "<p>&quot;Tom&quot; &amp; &quot;Jerry&quot; - &apos;The new adventures&apos;</p>";
         string view = "<p>{{name}}</p>";
         json context;
         context["name"] = "\"Tom\" & \"Jerry\" - 'The new adventures'";
         string res = m.render(view, context);
-        REQUIRE(res == html);
+        REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }
 
     SECTION("Escape symbols") {
-        string html = "<p>100&percnt;</p>";
+        string expected = "<p>100&percnt;</p>";
         string view = "<p>{{name}}</p>";
         string context = "{ \"name\": \"100%\" }";
         string res = m.render(view, context);
-        REQUIRE(res == html);
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Unescape HTML tags") {
+        string expected = "<p><div>to be escaped</div></p>";
+        string view = "<p>{{{ name }}}</p>";
+        string context = "{ \"name\": \"<div>to be escaped</div>\" }";
+        string res = m.render(view, context);
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Sequence of escape and unescape tags") {
+        string expected = "<p><b>YES</b></p><p>&lt;b&gt;NO&lt;/b&gt;</p>";
+        string view = "<p>{{{ yes }}}</p><p>{{ no }}</p>";
+        string context = "{ \"yes\": \"<b>YES</b>\", \"no\": \"<b>NO</b>\" }";
+        string res = m.render(view, context);
+        REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }
 }

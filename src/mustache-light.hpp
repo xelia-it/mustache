@@ -70,29 +70,33 @@ class RenderException : public std::runtime_error {
 };
 
 /// Tokens:
-///   sv = start variable = {{
-///   sc = start comment = {{!
-///   sb = start begin of section = {{#
-///   se = start end of section = {{/
-///   si = start if = {{=
-///   s0 = start existing test = {{0
-///   su = start unless = {{^
-///   sp = start partial = {{>
-///   st = start template = {{<
-///   ee = end = }}
+///   sv  = start variable = {{
+///   svu = start variable unescaped= {{{
+///   sc  = start comment = {{!
+///   sb  = start begin of section = {{#
+///   se  = start end of section = {{/
+///   si  = start if = {{=
+///   s0  = start existing test = {{0
+///   su  = start unless = {{^
+///   sp  = start partial = {{>
+///   st  = start template = {{<
+///   ee  = end = }}
+///   eeu = end = }}}
 ///   txt = (sequence of txt)
 ///
 /// Grammar:
-///   MESSAGE     := VARIABLE MESSAGE | COMMENT MESSAGE | SECTION MESSAGE |
-///                  IF MESSAGE | UNLESS MESSAGE | EXISTS_TEST MESSAGE |
-///                  PARTIAL MESSAGE | txt MESSAGE | (empty)
-///   VARIABLE    := sv txt ee
-///   COMMENT     := sc txt ee
-///   IF          := si txt ee
-///   EXISTS_TEST := s0 txt ee
-///   UNLESS      := sv txt ee
-///   SECTION     := sb txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
-///   PARTIAL     := sp txt ee | st txt ee
+///   MESSAGE            := VARIABLE MESSAGE | VARIABLE_UNESCAPED MESSAGE |
+///                         COMMENT MESSAGE | SECTION MESSAGE |
+///                         IF MESSAGE | UNLESS MESSAGE | EXISTS_TEST MESSAGE |
+///                         PARTIAL MESSAGE | txt MESSAGE | (empty)
+///   VARIABLE           := sv  txt ee
+///   VARIABLE_UNESCAPED := svu txt eeu
+///   COMMENT            := sc  txt ee
+///   IF                 := si  txt ee
+///   EXISTS_TEST        := s0  txt ee
+///   UNLESS             := sv  txt ee
+///   SECTION            := sb  txt ee MESSAGE se txt ee | sbi txt ee MESSAGE se txt ee
+///   PARTIAL            := sp  txt ee | st txt ee
 ///
 class Mustache {
   public:
@@ -172,7 +176,10 @@ class Mustache {
 
     /// List of all valid characters for partial tag.
     static const std::string VALID_CHARS_FOR_PARTIALS;
+
+    // List of valid tokens
     static const std::string TOKEN_START_VARIABLE;
+    static const std::string TOKEN_START_VARIABLE_UNESCAPED;
     static const std::string TOKEN_START_COMMENT;
     static const std::string TOKEN_START_BEGIN_SECTION;
     static const std::string TOKEN_START_END_SECTION;
@@ -182,6 +189,9 @@ class Mustache {
     static const std::string TOKEN_START_PARTIAL;
     static const std::string TOKEN_START_TEMPLATE;
     static const std::string TOKEN_END;
+    static const std::string TOKEN_END_UNESCAPED;
+
+    /// Default extension to be used for partials
     static const std::string DEFAULT_PARTIAL_EXTENSION;
 
     /// Base path is added to file name each time a file must be opened.
@@ -227,12 +237,15 @@ class Mustache {
     // Productions
     void produceMessage();
     void produceVariable();
+    void produceVariableUnescaped();
     void produceComment();
     void produceSection();
     void produceIf();
     void produceUnless();
     void produceNullTest();
     void producePartial();
+
+    void printVariable(bool escape_html);
 
     void partialSubstitute(const Tokens partialParams, Tokens& newTokens);
 
