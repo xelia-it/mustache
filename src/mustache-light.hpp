@@ -261,7 +261,7 @@ class Mustache {
         const std::string& valueToSearch);
 
     /// Throws an exception and stops rendering.
-    void error(const std::string& message);
+    [[noreturn]] void error(const std::string& message);
 
     /// Variable get in the current context
     ///
