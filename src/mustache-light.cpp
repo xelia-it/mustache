@@ -43,6 +43,7 @@ using json = nlohmann::json;
 
 #include <iostream>
 #include <vector>
+
 // Used for readFile
 #include <fstream>
 #include <string>
@@ -62,7 +63,7 @@ using std::map;
 namespace mustache {
 
 const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@[]";
-const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,!\"' \n\r";
+const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,;!?\"' \n\r°&";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
 const string Mustache::TOKEN_START_VARIABLE_UNESCAPED = "{{{";
@@ -244,14 +245,12 @@ string Mustache::render() {
         return rendered_;
 }
 
-vector<string> Mustache::tokenize(const string& view) {
+Mustache::Tokens Mustache::tokenize(const string& view) {
         std::string::size_type start = 0;
         std::string::size_type prev = 0;
         std::string::size_type pos;
         Tokens tokens;
 
-        // TODO(Alessandro Passerini): redundant?
-        tokens.clear();
         while ((pos = view.find_first_of("{}", prev)) != std::string::npos) {
                 if (view[pos] == '{') {
                         if (view[pos + 1] == '{') {
