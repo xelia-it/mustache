@@ -982,7 +982,6 @@ void Mustache::htmlEscape(string& data) {
         std::string buffer;
         buffer.reserve(data.size() * 1.2);
         for(size_t pos = 0; pos != data.size(); ++pos) {
-            std::cout << std::hex << int(data[pos]) << (data[pos] > 0 ? " POS " : " NEG ") << std::endl;
                 switch(data[pos]) {
                         case '&':  buffer.append("&amp;");       break;
                         case '\"': buffer.append("&quot;");      break;
