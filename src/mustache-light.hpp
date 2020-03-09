@@ -34,7 +34,7 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifndef SRC_MUSTACHE_LIGHT_HPP_
-#define	SRC_MUSTACHE_LIGHT_HPP_
+#define SRC_MUSTACHE_LIGHT_HPP_
 
 #include <string>
 #include <vector>
@@ -110,7 +110,6 @@ class Mustache {
     typedef Variables::const_iterator VariableConstIterator;
     typedef std::string Token;
     typedef std::vector<Token> Tokens;
-    // typedef Tokens::iterator TokenIterator;
     typedef long unsigned int TokenIndex;
 
     /// Construct a new Mustache object, using basePath as base partial
@@ -261,7 +260,7 @@ class Mustache {
         const std::string& valueToSearch);
 
     /// Throws an exception and stops rendering.
-    void error(const std::string& message);
+    [[noreturn]] void error(const std::string& message);
 
     /// Variable get in the current context
     ///

@@ -43,6 +43,7 @@ using json = nlohmann::json;
 
 #include <iostream>
 #include <vector>
+
 // Used for readFile
 #include <fstream>
 #include <string>
@@ -62,7 +63,7 @@ using std::map;
 namespace mustache {
 
 const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@[]";
-const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,!\"' \n\r";
+const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,;!?\"' \n\r°&";
 
 const string Mustache::TOKEN_START_VARIABLE = "{{";
 const string Mustache::TOKEN_START_VARIABLE_UNESCAPED = "{{{";
@@ -244,14 +245,12 @@ string Mustache::render() {
         return rendered_;
 }
 
-vector<string> Mustache::tokenize(const string& view) {
+Mustache::Tokens Mustache::tokenize(const string& view) {
         std::string::size_type start = 0;
         std::string::size_type prev = 0;
         std::string::size_type pos;
         Tokens tokens;
 
-        // TODO(Alessandro Passerini): redundant?
-        tokens.clear();
         while ((pos = view.find_first_of("{}", prev)) != std::string::npos) {
                 if (view[pos] == '{') {
                         if (view[pos + 1] == '{') {
@@ -983,6 +982,7 @@ void Mustache::htmlEscape(string& data) {
         std::string buffer;
         buffer.reserve(data.size() * 1.2);
         for(size_t pos = 0; pos != data.size(); ++pos) {
+            std::cout << std::hex << int(data[pos]) << (data[pos] > 0 ? " POS " : " NEG ") << std::endl;
                 switch(data[pos]) {
                         case '&':  buffer.append("&amp;");       break;
                         case '\"': buffer.append("&quot;");      break;
@@ -991,9 +991,9 @@ void Mustache::htmlEscape(string& data) {
                         case '>':  buffer.append("&gt;");        break;
                         case '%':  buffer.append("&percnt;");    break;
                         default:
-                                if (data[pos] > 31) {
-                                        buffer.append(&data[pos], 1);
-                                }
+                            if (static_cast<uint64_t>(data[pos]) > 31) {
+                                buffer.append(&data[pos], 1);
+                            }
                         break;
                 }
         }
