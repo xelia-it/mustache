@@ -92,6 +92,27 @@ TEST_CASE("Escape") {
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());
     }
+
+    SECTION("Escape accented chars") {
+        string expected = "<p>àèìòù</p>";
+        string view = "<p>{{name}}</p>";
+        json context;
+        context["name"] = "àèìòù";
+        string res = m.render(view, context);
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+    }
+
+    SECTION("Escape UTF8 symbols") {
+        string expected = "<p>ᐬ ⡳ ⪝ ⵁ ⸙ 砠 倭</p>";
+        string view = "<p>{{name}}</p>";
+        json context;
+        context["name"] = "ᐬ ⡳ ⪝ ⵁ ⸙ 砠 倭";
+        string res = m.render(view, context);
+        REQUIRE(res == expected);
+        REQUIRE(m.error().empty());
+
+    }
 }
 
 ////////////////////////////////////////////////////////////////////////////////
