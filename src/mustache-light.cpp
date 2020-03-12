@@ -981,34 +981,42 @@ inline string& Mustache::trim(string& s) {
 
 void Mustache::htmlEscape(string& data)
 {
-    static std::wstring_convert<std::codecvt_utf8_utf16<char16_t>, char16_t> utf16conv;
+    std::string buffer;
 
-    std::u16string buffer;
-    buffer.reserve(data.size() * 1.2);
-
-    // Convert from UTF-8 to UTF-16
-    std::u16string data_u16 = utf16conv.from_bytes(data);
-
-    for (auto& tchar : data_u16) {
-        switch(tchar) {
-        case '&':  buffer.append(u"&amp;");       break;
-        case '\"': buffer.append(u"&quot;");      break;
-        case '\'': buffer.append(u"&apos;");      break;
-        case '<':  buffer.append(u"&lt;");        break;
-        case '>':  buffer.append(u"&gt;");        break;
-        case '%':  buffer.append(u"&percnt;");    break;
-        default:
-            if (! std::iswcntrl(tchar)) {
-                buffer.push_back(tchar);
+	auto it = data.cbegin();
+	while (it != data.cend()) {
+		int sz = 1;
+		const uint8_t tchar = *it;
+		if (tchar & 0x80) {
+            // Multi-byte UTF-8 character
+            if ((tchar & ~0x1F) == 0xC0) {
+                sz = 2; // 2-byte UTF-8 character
+            } else if ((tchar & ~0xF0) == 0xE0) {
+                sz = 3; // 3-byte UTF-8 character
+            } else if ((tchar & ~0xF8) == 0xF0) {
+                sz = 4; // 4-byte UTF-8 character
             }
-            break;
-        }
-    }
-
-
-    // Convert from UTF-16 to UTF-8
-    std::string result = utf16conv.to_bytes(buffer);
-    data.swap(result);
+			for (int cnt = 0; cnt < sz; ++cnt) {
+				buffer.push_back(*it++);
+			}
+		} else { // single-byte character
+			switch (tchar) {
+			case '&':	buffer.append("&amp;");		break;
+			case '\"':	buffer.append("&quot;");	break;
+			case '\'':	buffer.append("&apos;");	break;
+			case '<':	buffer.append("&lt;");		break;
+			case '>':	buffer.append("&gt;");		break;
+			case '%':	buffer.append("&percnt;");	break;
+			default:
+				if (! std::iscntrl(tchar)) {
+					buffer.push_back(tchar);
+				}
+				break;
+			}
+			++it;
+		}
+	}
+	data.swap(buffer);
 }
 
 }  // namespace mustache
