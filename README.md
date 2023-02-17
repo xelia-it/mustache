@@ -1,3 +1,6 @@
+Mustache Light
+==============
+
 ## Synopsis
 
 The mustache library is a *mustache-inspired* templace engine written in C++11.
@@ -8,6 +11,10 @@ This is a _pre-release_ version: until version 1.0 breaking changes are possible
 
 It requires:
 * a GNU compiler with support for C++11
+
+## Dependencies
+
+It depends from:
 * The nlhomann JSON C++ library: https://github.com/nlohmann/json
 * The Catch2 C++ library for testing: https://github.com/catchorg/Catch2
 
