@@ -42,7 +42,7 @@
 #include <stack>
 #include <stdexcept>
 
-#include <json.hpp>
+#include <nlohmann/json.hpp>
 
 namespace mustache {
 

@@ -24,7 +24,8 @@ TEST_CPP_FILES := $(wildcard test/src/*.cpp)
 TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
 
 # Includes
-INCLUDES := -Ithird-party/json/single_include/nlohmann/
+INCLUDES := -Ithird-party/json/single_include/ \
+	-Ithird-party/catch2/single_include
 
 # Generic compiling flags
 CC_FLAGS := --std=c++11 -fPIC -Wall -Wextra -Wpedantic -Werror $(DEFS) $(INCLUDES)

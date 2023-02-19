@@ -36,10 +36,10 @@
 #include <string>
 using std::string;
 
-#include "../../json.hpp"
+#include <nlohmann/json.hpp>
 using nlohmann::json;
 
-#include "../../catch.hpp"
+#include <catch2/catch.hpp>
 
 #include "../../src/mustache-light.hpp"
 using mustache::Mustache;
