@@ -24,3 +24,6 @@ tags
 /nbproject
 /.projectile
 /.dir-locals.el
+
+# clangd compile flags
+compile_flags.txt
