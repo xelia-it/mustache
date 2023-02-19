@@ -35,9 +35,6 @@
 
 #include "./mustache-light.hpp"
 
-// Please download from:
-//   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
-
 #include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
@@ -993,7 +990,7 @@ void Mustache::htmlEscape(string& data)
         // U+0080  - U+07FF   110xxxxx  10xxxxxx
         // U+0800  - U+FFFF   1110xxxx  10xxxxxx  10xxxxxx
         // U+10000 - U+10FFFF 11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
-		if (1 == (tchar & 0x80)) {
+		if ((tchar & 0x80) == 0x80) {
             // Multi-byte UTF-8 character
             if ((tchar & 0xC0) == 0xC0) {
                 // 2-byte UTF-8 character
