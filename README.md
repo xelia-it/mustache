@@ -1,3 +1,6 @@
+Mustache Light
+==============
+
 ## Synopsis
 
 The mustache library is a *mustache-inspired* templace engine written in C++11.
@@ -8,26 +11,41 @@ This is a _pre-release_ version: until version 1.0 breaking changes are possible
 
 It requires:
 * a GNU compiler with support for C++11
+
+It depends from:
 * The nlhomann JSON C++ library: https://github.com/nlohmann/json
 * The Catch2 C++ library for testing: https://github.com/catchorg/Catch2
 
 ## Installation
 
-Download json.hpp from nlhomann from here:
-https://raw.githubusercontent.com/nlohmann/json/develop/single_include/nlohmann/json.hpp
-and put it into project root folder.
-
-Download Catch2 from here:
-https://raw.githubusercontent.com/catchorg/Catch2/master/single_include/catch2/catch.hpp
-and put it into project root folder.
+Clone the repo with:
+```
+git clone https://github.com/xelia-it/mustache.git --recursive --shallow-submodules --depth=1
+```
 
 Then type:
 ```
 make
+```
+
+If you want to run unit tests run:
+```
 make test
 ```
 
 Now you can link mustache.so with your C++ source code.
+
+## LSP Integration
+
+For LSP (Language Server protocol) integration it's useful to have  add a _compile_flags.txt_ file in the root diretory of the project.
+The suggested content is:
+
+```
+-std=c++11
+-fPIC
+-Ithird-party/json/single_include
+-Ithird-party/catch2/single_include
+```
 
 ## Implemented standard commands
 
@@ -74,11 +92,12 @@ or ``{{0 array[index] }}``.
 ## TODO
 
 There a number of work planned:
-* more tests
-* use of git submodule to link to original projects
-* implementation of new commands
-* improve documentation
-* integration with CMake
+- [ ] more tests
+- [x] use of git submodule to link to original projects
+- [ ] implementation of new commands
+- [ ] finalize v1.0 interface
+- [ ] improve documentation
+- [ ] integration with CMake
 
 ## License
 

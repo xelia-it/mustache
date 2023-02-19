@@ -42,9 +42,7 @@
 #include <stack>
 #include <stdexcept>
 
-// Please download from:
-//   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
-#include "../json.hpp"
+#include <nlohmann/json.hpp>
 
 namespace mustache {
 

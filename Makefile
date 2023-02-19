@@ -23,8 +23,13 @@ TEST_NAME := mustache-test
 TEST_CPP_FILES := $(wildcard test/src/*.cpp)
 TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
 
+# Includes
+INCLUDES := -Ithird-party/json/single_include/ \
+	-Ithird-party/catch2/single_include
+
 # Generic compiling flags
-CC_FLAGS := --std=c++11 -fPIC -Wall -Wextra -Wpedantic -Werror $(DEFS)
+CPP_LANGUAGE_VERSION := c++11
+CC_FLAGS := --std=$(CPP_LANGUAGE_VERSION) -fPIC -Wall -Wextra -Wpedantic -Werror $(DEFS) $(INCLUDES)
 LD_FLAGS := -l$(LIBRARY_NAME) -L.
 
 # Targets
@@ -35,10 +40,19 @@ clean:
 	rm -f $(LIBRARY_SHARED) $(LIBRARY_STATIC) $(LIBRARY_OBJ_FILES) $(INTERACTIVE_NAME) \
 		$(TEST_NAME) $(TEST_OBJ_FILES)
 
+distclean: clean
+
 check:
-	cppcheck --enable=all --quiet --inconclusive --std=c++11 \
-		--suppress=*:*catch.hpp \
-	$(TEST_NAME).cpp $(TEST_CPP_FILES) $(LIBRARY_CPP_FILES)
+	@if which cppcheck; then \
+	    echo "OK"; \
+        cppcheck --enable=all --quiet --inconclusive \
+			--std=$(CPP_LANGUAGE_VERSION) \
+			--suppress=*:*catch.hpp \
+			$(TEST_NAME).cpp $(TEST_CPP_FILES) $(LIBRARY_CPP_FILES); \
+	else \
+      echo "cppcheck not installed"; \
+      false; \
+	fi
 
 test: all
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(TEST_NAME)

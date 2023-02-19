@@ -37,7 +37,7 @@
 #include <string>
 using std::string;
 
-#include "../../catch.hpp"
+#include <catch2/catch.hpp>
 
 #include "../../src/mustache-light.hpp"
 using mustache::Mustache;
