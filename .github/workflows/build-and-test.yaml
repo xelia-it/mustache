@@ -1,8 +1,18 @@
-name: Build and Test
-on: [ push ]
+# Github Actions
+
+# Jobs for testing library before accepting a Pull Request
+
+name: Run Unit Tests
+
+on:
+  pull_request:
+    branches:
+    - 'main'
+    - 'develop'
+    - 'release/**'
 
 jobs:
-  Build-And-Test:
+  Run-Unit-Tests:
     runs-on: ubuntu-latest
 
     steps:
