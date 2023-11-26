@@ -23,8 +23,15 @@ TEST_NAME := mustache-test
 TEST_CPP_FILES := $(wildcard test/src/*.cpp)
 TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
 
+# Benchmark files variables
+BENCHMARK_NAME := mustache-benchmark
+BENCHMARK_CPP_FILES := $(wildcard benchmark/src/*.cpp)
+BENCHMARK_OBJ_FILES := $(BENCHMARK_CPP_FILES:.cpp=.o)
+
 # Includes
-INCLUDES := -Ithird-party/json/single_include/ \
+INCLUDES := \
+	-Isrc \
+	-Ithird-party/json/single_include/ \
 	-Ithird-party/catch2/single_include
 
 # Generic compiling flags
@@ -34,7 +41,8 @@ LD_FLAGS := -l$(LIBRARY_NAME) -L.
 
 # Targets
 
-all: $(LIBRARY_SHARED) $(LIBRARY_STATIC) $(INTERACTIVE_NAME) $(TEST_NAME)
+all: $(LIBRARY_SHARED) $(LIBRARY_STATIC) \
+	$(INTERACTIVE_NAME) $(TEST_NAME) $(BENCHMARK_NAME)
 
 clean:
 	rm -f $(LIBRARY_SHARED) $(LIBRARY_STATIC) $(LIBRARY_OBJ_FILES) $(INTERACTIVE_NAME) \
@@ -44,18 +52,21 @@ distclean: clean
 
 check:
 	@if which cppcheck; then \
-	    echo "OK"; \
-        cppcheck --enable=all --quiet --inconclusive \
+		 echo "OK"; \
+		cppcheck --enable=all --quiet --inconclusive \
 			--std=$(CPP_LANGUAGE_VERSION) \
 			--suppress=*:*catch.hpp \
 			$(TEST_NAME).cpp $(TEST_CPP_FILES) $(LIBRARY_CPP_FILES); \
 	else \
-      echo "cppcheck not installed"; \
-      false; \
+		echo "cppcheck not installed"; \
+		false; \
 	fi
 
 test: all
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(TEST_NAME)
+
+benchmark: all
+	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(BENCHMARK_NAME)
 
 install: $(LIBRARY_SHARED) $(LIBRARY_STATIC)
 	[ -d $(DESTDIR)$(libdir) ] || $(INSTALL_PROGRAM) -d $(DESTDIR)$(libdir)/
@@ -76,6 +87,10 @@ $(INTERACTIVE_NAME): $(LIBRARY_SHARED) $(INTERACTIVE_NAME).cpp
 # Build unit test program
 $(TEST_NAME): $(LIBRARY_SHARED) $(TEST_OBJ_FILES)
 	$(CXX) $(CC_FLAGS) $(TEST_OBJ_FILES) -o $(TEST_NAME) $(LD_FLAGS)
+
+# Build unit test program
+$(BENCHMARK_NAME): $(LIBRARY_SHARED) $(BENCHMARK_OBJ_FILES)
+	$(CXX) $(CC_FLAGS) $(BENCHMARK_OBJ_FILES) -o $(BENCHMARK_NAME) $(LD_FLAGS)
 
 %.o: %.cpp Makefile
 	$(CXX) $(CC_FLAGS) -c -o $@ $<
