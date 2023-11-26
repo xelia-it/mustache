@@ -1,5 +1,5 @@
-Implemented Mustache commands
-=============================
+Supported Mustache commands
+===========================
 
 ## Implemented standard commands
 
