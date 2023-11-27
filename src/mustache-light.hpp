@@ -33,8 +33,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#ifndef SRC_MUSTACHE_LIGHT_HPP_
-#define SRC_MUSTACHE_LIGHT_HPP_
+#pragma once
 
 #include <string>
 #include <vector>
@@ -42,7 +41,7 @@
 #include <stack>
 #include <stdexcept>
 
-#include <nlohmann/json.hpp>
+#include "json.hpp"
 
 namespace mustache {
 
@@ -317,7 +316,5 @@ class Mustache {
 };
 
 } // namespace mustache
-
-#endif  // SRC_MUSTACHE_LIGHT_HPP_
 
 ////////////////////////////////////////////////////////////////////////////////

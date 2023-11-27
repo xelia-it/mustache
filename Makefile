@@ -24,7 +24,8 @@ TEST_CPP_FILES := $(wildcard test/src/*.cpp)
 TEST_OBJ_FILES := $(TEST_CPP_FILES:.cpp=.o)
 
 # Includes
-INCLUDES := -Ithird-party/json/single_include/ \
+INCLUDES := \
+	-Ithird-party/json/single_include/ \
 	-Ithird-party/catch2/single_include
 
 # Generic compiling flags
@@ -43,15 +44,17 @@ clean:
 distclean: clean
 
 check:
-	@if which cppcheck; then \
-	    echo "OK"; \
-        cppcheck --enable=all --quiet --inconclusive \
+	@if `which cppcheck > /dev/null`; then \
+		echo "Checking code with cppcheck"; \
+		cppcheck --enable=all --quiet --inconclusive \
 			--std=$(CPP_LANGUAGE_VERSION) \
-			--suppress=*:*catch.hpp \
+			--suppress=*:third-party/* \
+			--suppress=toomanyconfigs \
+			--suppress=missingIncludeSystem \
 			$(TEST_NAME).cpp $(TEST_CPP_FILES) $(LIBRARY_CPP_FILES); \
 	else \
-      echo "cppcheck not installed"; \
-      false; \
+		echo "cppcheck not installed"; \
+		false; \
 	fi
 
 test: all
