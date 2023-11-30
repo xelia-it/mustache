@@ -5,12 +5,11 @@
 name: Build-And-Test
 
 on:
-  push
-#  pull_request:
-#    branches:
-#    - 'main'
-#    - 'develop'
-#    - 'release/**'
+  pull_request:
+    branches:
+    - 'main'
+    - 'develop'
+    - 'release/**'
 
 jobs:
   Build-And-Test:
@@ -32,5 +31,6 @@ jobs:
 
     - name: Memcheck
       run: |
+        sudo apt update
         sudo apt install -y valgrind
         make memcheck
