@@ -33,17 +33,19 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
+//#include <iostream>
 #include <vector>
 using std::vector;
 #include <map>
 using std::map;
 
 // Used for readFile
-#include <fstream>
 #include <string>
 using std::string;
+#include <fstream>
+using std::ifstream;
 #include <sstream>
+using std::stringstream;
 
 #include <algorithm>
 #include <functional>
@@ -53,6 +55,7 @@ using std::string;
 using json = nlohmann::json;
 
 #include "./mustache-light.hpp"
+
 
 namespace mustache {
 
@@ -185,7 +188,7 @@ namespace mustache {
 
     string Mustache::fileRead(const string& fileName, const string& fileExtension) {
         const string realFileName = basePath_ + fileName + "." + fileExtension;
-        std::ifstream in(realFileName.c_str(), std::ios::in | std::ios::binary);
+        ifstream in(realFileName.c_str(), std::ios::in | std::ios::binary);
         if (in) {
             string contents;
             in.seekg(0, std::ios::end);
@@ -237,16 +240,17 @@ namespace mustache {
         LOG_END("------------------------------------------------------");
         LOG_END("Output:");
         LOG_END(rendered_);
+
         return rendered_;
     }
 
     Mustache::Tokens Mustache::tokenize(const string& view) {
-        std::string::size_type start = 0;
-        std::string::size_type prev = 0;
-        std::string::size_type pos;
+        string::size_type start = 0;
+        string::size_type prev = 0;
+        string::size_type pos;
         Tokens tokens;
 
-        while ((pos = view.find_first_of("{}", prev)) != std::string::npos) {
+        while ((pos = view.find_first_of("{}", prev)) != string::npos) {
             if (view[pos] == '{') {
                 if (view[pos + 1] == '{') {
                     // Insert into tokens text encountered until "{{"
@@ -691,12 +695,12 @@ namespace mustache {
         Variables partialVariables;
         LOG_END("===============================================");
 
-        for (std::vector<string>::size_type i = 1; i != partialParams.size(); i++) {
+        for (vector<string>::size_type i = 1; i != partialParams.size(); i++) {
             LOG("Token: |");
             const string& token = partialParams.at(i);
             LOG(token);
             LOG_END("|");
-            if (token.find_first_of("=") == std::string::npos) {
+            if (token.find_first_of("=") == string::npos) {
                 error("Bad substitution string: missing '=' in " + token);
             }
             vector<string> pair = split(token, '=');
@@ -706,8 +710,6 @@ namespace mustache {
 
             VariableConstIterator lb = partialSearchVariable(partialVariables, pair.at(1));
 
-            // map<string, string>::iterator lb = partialVariables.lower_bound(pair.at(0));
-            // if (lb != partialVariables.end() && !(partialVariables.key_comp()(pair.at(0), lb->first))) {
             if (lb != partialVariables.end()) {
                 // key already exists
                 // update lb->second if you care to
@@ -779,7 +781,7 @@ namespace mustache {
                     LOG_END(valueToSubstitute);
 
                     // LOG_END("DUMP BEFORE:");
-                    // for (std::vector<string>::size_type j = 0; j != newTokens.size(); j++) {
+                    // for (vector<string>::size_type j = 0; j != newTokens.size(); j++) {
                     //     LOG(j);
                     //     LOG(" ");
                     //     LOG_END(newTokens.at(j));
@@ -790,7 +792,7 @@ namespace mustache {
                     newTokens.erase(newTokens.begin() + i);
 
                     LOG_END("DUMP AFTER:");
-                    for (std::vector<string>::size_type j = 0; j != newTokens.size(); j++) {
+                    for (vector<string>::size_type j = 0; j != newTokens.size(); j++) {
                         LOG(j);
                         LOG(" ");
                         LOG_END(newTokens.at(j));
@@ -802,7 +804,7 @@ namespace mustache {
                 newTokens.at(i) = valueToSubstitute;
             }
         }
-        //partialVariables.clear();
+
         LOG_END("===============================================");
     }
 
@@ -829,13 +831,13 @@ namespace mustache {
             return "null"_json;
         }
 
-        std::string::size_type start;
-        std::string::size_type stop;
-        std::string::size_type index = std::string::npos;
+        string::size_type start;
+        string::size_type stop;
+        string::size_type index = string::npos;
         string newKey = key;
 
-        if ((start = key.find_first_of("[")) != std::string::npos) {
-            if ((stop = key.find_first_of("]")) == std::string::npos) {
+        if ((start = key.find_first_of("[")) != string::npos) {
+            if ((stop = key.find_first_of("]")) == string::npos) {
                 error("Missing ] in array selection");
             }
             if (start + 1 == stop) {
@@ -852,7 +854,7 @@ namespace mustache {
         if (it == top.end()) {
             LOG_END("NOT FOUND:");
             throw std::invalid_argument("Variable " + key + " not found");
-        } else if (index == std::string::npos) {
+        } else if (index == string::npos) {
             LOG_END("NORMAL USE *it:");
             json value = *it;
             return value;
@@ -918,14 +920,14 @@ namespace mustache {
 
     void Mustache::ensureValidIdentifier(const string& id, const string& validChars) {
         std::size_t found = id.find_first_not_of(validChars);
-        if (found != std::string::npos) {
+        if (found != string::npos) {
             error("Invalid identifier '" + id + "': bad char '" + id.at(found) + "' at index " + std::to_string(found) + " valid are " + validChars);
         }
     }
 
     vector<string>& Mustache::split(const string &str, char delim, vector<string> &elems) {
-        std::stringstream ss(str);
-        std::string item;
+        stringstream ss(str);
+        string item;
         while (std::getline(ss, item, delim)) {
             elems.push_back(item);
         }
@@ -933,7 +935,7 @@ namespace mustache {
     }
 
     vector<string> Mustache::split(const string& str, char delim) {
-        std::vector<std::string> elems;
+        vector<string> elems;
         split(str, delim, elems);
         return elems;
     }
@@ -965,7 +967,7 @@ namespace mustache {
     }
 
     // Trim a string from end
-    inline std::string& Mustache::rtrim(string& s) {
+    inline string& Mustache::rtrim(string& s) {
         s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
             return !std::isspace(ch);
         }).base(), s.end());
@@ -979,7 +981,7 @@ namespace mustache {
 
     void Mustache::htmlEscape(string& data)
     {
-        std::string buffer;
+        string buffer;
 
         auto it = data.cbegin();
         while (it != data.cend()) {

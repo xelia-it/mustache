@@ -1,7 +1,7 @@
 Versioning
 ==========
 
-Starting from commit _dfdef8f_ we have changed the versioning method.
+Starting from commit _bd61e91_ we have changed the versioning method.
 
 We now use _release_ branches for distributing production-ready code.
 

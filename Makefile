@@ -51,11 +51,13 @@ clean:
 distclean: clean
 
 check:
-	@if which cppcheck; then \
-		 echo "OK"; \
+	@if `which cppcheck > /dev/null`; then \
+		echo "Checking code with cppcheck"; \
 		cppcheck --enable=all --quiet --inconclusive \
 			--std=$(CPP_LANGUAGE_VERSION) \
-			--suppress=*:*catch.hpp \
+			--suppress=*:third-party/* \
+			--suppress=toomanyconfigs \
+			--suppress=missingIncludeSystem \
 			$(TEST_NAME).cpp $(TEST_CPP_FILES) $(LIBRARY_CPP_FILES); \
 	else \
 		echo "cppcheck not installed"; \
@@ -64,6 +66,16 @@ check:
 
 test: all
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(TEST_NAME)
+
+memcheck: all
+	@if `which valgrind > /dev/null`; then \
+		echo "Checking code with valgrind"; \
+		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):.; \
+		valgrind --leak-check=full --error-exitcode=1 ./$(TEST_NAME); \
+	else \
+		echo "valgrind not installed"; \
+		false; \
+	fi
 
 benchmark: all
 	export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):. && ./$(BENCHMARK_NAME)
