@@ -35,31 +35,28 @@
 
 #include "./mustache-light.hpp"
 
-// Please download from:
-//   https://github.com/nlohmann/json/releases/download/v1.0.0-rc1/json.hpp
-
-#include "../json.hpp"
+#include <nlohmann/json.hpp>
 using json = nlohmann::json;
 
 #include <iostream>
 #include <vector>
-#include <codecvt>
-
-// Used for readFile
-#include <fstream>
-#include <string>
-#include <sstream>
+using std::vector;
+#include <map>
+using std::map;
 
 #include <algorithm>
 #include <functional>
 #include <cctype>
-#include <locale>
 
-using std::cout;
-using std::endl;
-using std::vector;
+#include <string>
 using std::string;
-using std::map;
+
+// Used for readFile
+#include <fstream>
+#include <sstream>
+
+
+
 
 namespace mustache {
 
@@ -188,6 +185,8 @@ string Mustache::renderFilenames(const string& viewFileName, const string& conte
 
         return render(view, context);
 }
+
+
 
 string Mustache::fileRead(const string& fileName, const string& fileExtension) {
         const string realFileName = basePath_ + fileName + "." + fileExtension;
@@ -835,13 +834,13 @@ json Mustache::searchVariableInContext(const string& key) {
                 return "null"_json;
         }
 
-        std::string::size_type start;
-        std::string::size_type stop;
-        std::string::size_type index = std::string::npos;
+        string::size_type start;
+        string::size_type stop;
+        string::size_type index = string::npos;
         string newKey = key;
 
-        if ((start = key.find_first_of("[")) != std::string::npos) {
-                if ((stop = key.find_first_of("]")) == std::string::npos) {
+        if ((start = key.find_first_of("[")) != string::npos) {
+                if ((stop = key.find_first_of("]")) == string::npos) {
                         error("Missing ] in array selection");
                 }
                 if (start + 1 == stop) {
@@ -858,7 +857,7 @@ json Mustache::searchVariableInContext(const string& key) {
         if (it == top.end()) {
                 LOG_END("NOT FOUND:");
                 throw std::invalid_argument("Variable " + key + " not found");
-        } else if (index == std::string::npos) {
+        } else if (index == string::npos) {
                 LOG_END("NORMAL USE *it:");
                 json value = *it;
                 return value;
@@ -964,19 +963,23 @@ void Mustache::dumpTokens() {
 
 // trim from start
 inline string& Mustache::ltrim(string& s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), std::not1(std::ptr_fun<int, int>(std::isspace))));
-        return s;
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+    return s;
 }
 
 // trim from end
 inline std::string& Mustache::rtrim(string& s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
-        return s;
+   s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+    return s;
 }
 
 // trim from both ends
 inline string& Mustache::trim(string& s) {
-        return ltrim(rtrim(s));
+    return ltrim(rtrim(s));
 }
 
 void Mustache::htmlEscape(string& data)
@@ -987,13 +990,21 @@ void Mustache::htmlEscape(string& data)
 	while (it != data.cend()) {
 		int sz = 1;
 		const uint8_t tchar = *it;
-		if (tchar & 0x80) {
+
+        // From Wikipedia: https://en.wikipedia.org/wiki/UTF-8
+        // U+0000  - U+007F   0xxxxxxx
+        // U+0080  - U+07FF   110xxxxx  10xxxxxx
+        // U+0800  - U+FFFF   1110xxxx  10xxxxxx  10xxxxxx
+        // U+10000 - U+10FFFF 11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
+		if ((tchar & 0x80) == 0x80) {
             // Multi-byte UTF-8 character
-            if ((tchar & ~0x1F) == 0xC0) {
-                sz = 2; // 2-byte UTF-8 character
-            } else if ((tchar & ~0xF0) == 0xE0) {
+            if ((tchar & 0xC0) == 0xC0) {
+                // 2-byte UTF-8 character
+                // 110xxxxx
+                sz = 2;
+            } else if ((tchar & 0xE0) == 0xE0) {
                 sz = 3; // 3-byte UTF-8 character
-            } else if ((tchar & ~0xF8) == 0xF0) {
+            } else if ((tchar & 0xF8) == 0xF8) {
                 sz = 4; // 4-byte UTF-8 character
             }
 			for (int cnt = 0; cnt < sz; ++cnt) {
