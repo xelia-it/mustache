@@ -33,7 +33,7 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-//#include <iostream>
+// #include <iostream>
 #include <vector>
 using std::vector;
 #include <map>
@@ -56,8 +56,8 @@ using json = nlohmann::json;
 
 #include "./mustache-light.hpp"
 
-
-namespace mustache {
+namespace mustache
+{
 
     const string Mustache::VALID_CHARS_FOR_ID = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_@[]";
     const string Mustache::VALID_CHARS_FOR_PARTIALS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_/|=[]().,;!?\"' \n\r°&";
@@ -78,88 +78,96 @@ namespace mustache {
     const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
 
 #ifdef DEBUG
-#    define LOG_START(x) cout << (x)
-#    define LOG(x) cout << (x)
-#    define LOG_END(x) cout << (x) << endl
+#define LOG_START(x) cout << (x)
+#define LOG(x) cout << (x)
+#define LOG_END(x) cout << (x) << endl
 #else
-#    define LOG_START(x)
-#    define LOG(x)
-#    define LOG_END(x)
+#define LOG_START(x)
+#define LOG(x)
+#define LOG_END(x)
 #endif
 
-#define IS_TOKEN(token)                         \
+#define IS_TOKEN(token) \
     (tokens_.at(currentToken_) == (token))
 
-#define IS_TOKEN_EMPTY()                        \
+#define IS_TOKEN_EMPTY() \
     (currentToken_ == tokens_.size())
 
-#define CHECK_TOKEN_NOT_EMPTY()                 \
-    if (currentToken_ == tokens_.size()) {      \
-        error("Unexpected end of file.");       \
-        return;                                 \
+#define CHECK_TOKEN_NOT_EMPTY()           \
+    if (currentToken_ == tokens_.size())  \
+    {                                     \
+        error("Unexpected end of file."); \
+        return;                           \
     }
 
-#define CONSUME_TOKEN()                         \
-    ++ currentToken_
+#define CONSUME_TOKEN() \
+    ++currentToken_
 
-#define CHECK_TOKEN_IS(token)                                           \
-    if ((currentToken_ == tokens_.size())                               \
-        || (tokens_.at(currentToken_) != (token))) {                    \
-        error("Missing " + (token));                                    \
-        return;                                                         \
+#define CHECK_TOKEN_IS(token)                                                        \
+    if ((currentToken_ == tokens_.size()) || (tokens_.at(currentToken_) != (token))) \
+    {                                                                                \
+        error("Missing " + (token));                                                 \
+        return;                                                                      \
     }
 
-#define CHECK_TOKEN_IS_NOT(token)                                       \
-    if ((currentToken_ == tokens_.size())                               \
-        && (tokens_.at(currentToken_) == (token))) {                    \
-        error("Unexpected " + (token));                                 \
-        return;                                                         \
+#define CHECK_TOKEN_IS_NOT(token)                                                    \
+    if ((currentToken_ == tokens_.size()) && (tokens_.at(currentToken_) == (token))) \
+    {                                                                                \
+        error("Unexpected " + (token));                                              \
+        return;                                                                      \
     }
 
 // Ensure token is (txt).
 // We need to check all known tokens because (txt) is free text.
-#define CHECK_TOKEN_IS_TEXT()                       \
-    CHECK_TOKEN_NOT_EMPTY();                        \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE);       \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT);        \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION);  \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION);    \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_IF);             \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS);         \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_EXISTS_TEST);    \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL);        \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE);       \
+#define CHECK_TOKEN_IS_TEXT()                      \
+    CHECK_TOKEN_NOT_EMPTY();                       \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE);      \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT);       \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION); \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION);   \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_IF);            \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS);        \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_EXISTS_TEST);   \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL);       \
+    CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE);      \
     CHECK_TOKEN_IS_NOT(TOKEN_END)
 
-    Mustache::Mustache(const string& basePath) :
-        basePath_(basePath), partialExtension_(DEFAULT_PARTIAL_EXTENSION),
-        view_(""), context_("{}"),
-        currentListCounter_(0), visible_(true) {
+    Mustache::Mustache(const string &basePath) : basePath_(basePath), partialExtension_(DEFAULT_PARTIAL_EXTENSION),
+                                                 view_(""), context_("{}"),
+                                                 currentListCounter_(0), visible_(true)
+    {
     }
 
-    Mustache::Mustache(const string& basePath, const string& partialExtension) :
-        basePath_(basePath), partialExtension_(partialExtension),
-        view_(""), context_("{}"),
-        currentListCounter_(0), visible_(true) {
+    Mustache::Mustache(const string &basePath, const string &partialExtension) : basePath_(basePath), partialExtension_(partialExtension),
+                                                                                 view_(""), context_("{}"),
+                                                                                 currentListCounter_(0), visible_(true)
+    {
     }
 
-    Mustache::~Mustache() {
+    Mustache::~Mustache()
+    {
         data_.clear();
         context_.clear();
         tokens_.clear();
         rendered_.clear();
     }
 
-    string Mustache::render(const string& view, const string& context) {
+    string Mustache::render(const string &view, const string &context)
+    {
         view_ = view;
         context_ = context;
-        try {
+        try
+        {
             data_ = json::parse(context_);
-        } catch (const std::runtime_error& err) {
+        }
+        catch (const std::runtime_error &err)
+        {
             rendered_.clear();
             error_ = err.what();
             return rendered_;
-        } catch (const std::invalid_argument& err) {
+        }
+        catch (const std::invalid_argument &err)
+        {
             rendered_.clear();
             error_ = err.what();
             return rendered_;
@@ -168,28 +176,33 @@ namespace mustache {
         return render();
     }
 
-    string Mustache::render(const string& view, const json& context) {
+    string Mustache::render(const string &view, const json &context)
+    {
         view_ = view;
         data_ = context;
 
         return render();
     }
 
-    string Mustache::error() const {
+    string Mustache::error() const
+    {
         return error_;
     }
 
-    string Mustache::renderFilenames(const string& viewFileName, const string& contextFileName) {
-        const string& view = fileRead(viewFileName);
-        const string& context = fileRead(contextFileName, "json");
+    string Mustache::renderFilenames(const string &viewFileName, const string &contextFileName)
+    {
+        const string &view = fileRead(viewFileName);
+        const string &context = fileRead(contextFileName, "json");
 
         return render(view, context);
     }
 
-    string Mustache::fileRead(const string& fileName, const string& fileExtension) {
+    string Mustache::fileRead(const string &fileName, const string &fileExtension)
+    {
         const string realFileName = basePath_ + fileName + "." + fileExtension;
         ifstream in(realFileName.c_str(), std::ios::in | std::ios::binary);
-        if (in) {
+        if (in)
+        {
             string contents;
             in.seekg(0, std::ios::end);
             contents.resize(in.tellg());
@@ -201,11 +214,13 @@ namespace mustache {
         error("Cannot open file: " + realFileName);
     }
 
-    string Mustache::fileRead(const string& fileName) {
+    string Mustache::fileRead(const string &fileName)
+    {
         return fileRead(fileName, partialExtension_);
     }
 
-    string Mustache::render() {
+    string Mustache::render()
+    {
         error_.clear();
 
         // Tokenize view
@@ -222,7 +237,8 @@ namespace mustache {
         currentToken_ = 0;
 
         // Reset stack: start from a stack containing the whole json
-        while (!stack_.empty()) {
+        while (!stack_.empty())
+        {
             stack_.pop();
         }
         stack_.push(data_);
@@ -231,9 +247,12 @@ namespace mustache {
 
         LOG_END("------------------------------------------------------");
         LOG_END("Render:");
-        try {
+        try
+        {
             produceMessage();
-        } catch (const RenderException& err) {
+        }
+        catch (const RenderException &err)
+        {
             error_ = err.what();
             return rendered_;
         }
@@ -244,72 +263,106 @@ namespace mustache {
         return rendered_;
     }
 
-    Mustache::Tokens Mustache::tokenize(const string& view) {
+    Mustache::Tokens Mustache::tokenize(const string &view)
+    {
         string::size_type start = 0;
         string::size_type prev = 0;
         string::size_type pos;
         Tokens tokens;
 
-        while ((pos = view.find_first_of("{}", prev)) != string::npos) {
-            if (view[pos] == '{') {
-                if (view[pos + 1] == '{') {
+        while ((pos = view.find_first_of("{}", prev)) != string::npos)
+        {
+            if (view[pos] == '{')
+            {
+                if (view[pos + 1] == '{')
+                {
                     // Insert into tokens text encountered until "{{"
                     tokens.push_back(view.substr(start, pos - start));
-                    if (view[pos + 2] == '#') {
+                    if (view[pos + 2] == '#')
+                    {
                         tokens.push_back(TOKEN_START_BEGIN_SECTION);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '=') {
+                    }
+                    else if (view[pos + 2] == '=')
+                    {
                         tokens.push_back(TOKEN_START_IF);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '^') {
+                    }
+                    else if (view[pos + 2] == '^')
+                    {
                         tokens.push_back(TOKEN_START_UNLESS);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '0') {
+                    }
+                    else if (view[pos + 2] == '0')
+                    {
                         tokens.push_back(TOKEN_START_EXISTS_TEST);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '/') {
+                    }
+                    else if (view[pos + 2] == '/')
+                    {
                         tokens.push_back(TOKEN_START_END_SECTION);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '>') {
+                    }
+                    else if (view[pos + 2] == '>')
+                    {
                         tokens.push_back(TOKEN_START_PARTIAL);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '<') {
+                    }
+                    else if (view[pos + 2] == '<')
+                    {
                         tokens.push_back(TOKEN_START_TEMPLATE);
                         prev = pos + 3;
-                    } else if (view[pos + 2] == '!') {
+                    }
+                    else if (view[pos + 2] == '!')
+                    {
                         tokens.push_back(TOKEN_START_COMMENT);
                         prev = pos + 3;
-                    } else {
-                        if (view[pos + 2] == '{') {
+                    }
+                    else
+                    {
+                        if (view[pos + 2] == '{')
+                        {
                             tokens.push_back(TOKEN_START_VARIABLE_UNESCAPED);
                             prev = pos + 3;
-                        } else {
+                        }
+                        else
+                        {
                             tokens.push_back(TOKEN_START_VARIABLE);
                             prev = pos + 2;
                         }
                     }
                     start = prev;
-                } else {
+                }
+                else
+                {
                     // Single open {: continue..
                     prev = pos + 1;
                 }
-            } else {
-                if (view[pos + 1] == '}') {
+            }
+            else
+            {
+                if (view[pos + 1] == '}')
+                {
                     // Trim string inside parenthesis.
                     // Eg: "{{ some }}" => " some " => "some"
                     string token = view.substr(start, pos - start);
                     token = trim(token);
                     // Now save both token and closed parenthesis "}}"
                     tokens.push_back(token);
-                    if (view[pos + 2] == '}') {
+                    if (view[pos + 2] == '}')
+                    {
                         tokens.push_back(TOKEN_END_UNESCAPED);
                         prev = pos + 3;
-                    } else {
+                    }
+                    else
+                    {
                         tokens.push_back(TOKEN_END);
                         prev = pos + 2;
                     }
                     start = prev;
-                } else {
+                }
+                else
+                {
                     // Single close }: continue..
                     prev = pos + 1;
                 }
@@ -321,17 +374,20 @@ namespace mustache {
         return tokens;
     }
 
-    void Mustache::produceMessage() {
+    void Mustache::produceMessage()
+    {
         LOG_START("");
         LOG_END("MESSAGE := ");
         LOG_START("");
 
-        if (IS_TOKEN_EMPTY()) {
+        if (IS_TOKEN_EMPTY())
+        {
             LOG_END("  (empty)");
 
             return;
         }
-        if (IS_TOKEN(TOKEN_START_VARIABLE)) {
+        if (IS_TOKEN(TOKEN_START_VARIABLE))
+        {
             LOG_END("  VARIABLE");
             CONSUME_TOKEN();
             produceVariable();
@@ -340,7 +396,8 @@ namespace mustache {
 
             return;
         }
-        if (IS_TOKEN(TOKEN_START_VARIABLE_UNESCAPED)) {
+        if (IS_TOKEN(TOKEN_START_VARIABLE_UNESCAPED))
+        {
             LOG_END("  VARIABLE UNESCAPED");
             CONSUME_TOKEN();
             produceVariableUnescaped();
@@ -349,7 +406,8 @@ namespace mustache {
 
             return;
         }
-        if (IS_TOKEN(TOKEN_START_COMMENT)) {
+        if (IS_TOKEN(TOKEN_START_COMMENT))
+        {
             LOG_END("  COMMENT");
             CONSUME_TOKEN();
             produceComment();
@@ -359,7 +417,8 @@ namespace mustache {
             return;
         }
         if (IS_TOKEN(TOKEN_START_BEGIN_SECTION) || IS_TOKEN(TOKEN_START_IF) ||
-            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_EXISTS_TEST)) {
+            IS_TOKEN(TOKEN_START_UNLESS) || IS_TOKEN(TOKEN_START_EXISTS_TEST))
+        {
             LOG_END("  SECTION");
             CONSUME_TOKEN();
             produceSection();
@@ -367,27 +426,31 @@ namespace mustache {
             produceMessage();
             return;
         }
-        if (IS_TOKEN(TOKEN_START_END_SECTION)) {
+        if (IS_TOKEN(TOKEN_START_END_SECTION))
+        {
             //        if (stack_.size() == 1) {
             //            error("Unexpected end of block '" + TOKEN_START_END_SECTION + "'");
             //        }
             // If we are in a block do not throw error.. simply return
             return;
         }
-        if (IS_TOKEN(TOKEN_START_PARTIAL) || IS_TOKEN(TOKEN_START_TEMPLATE)) {
+        if (IS_TOKEN(TOKEN_START_PARTIAL) || IS_TOKEN(TOKEN_START_TEMPLATE))
+        {
             LOG_END("  PARTIAL");
             CONSUME_TOKEN();
             producePartial();
             produceMessage();
             return;
         }
-        if (IS_TOKEN(TOKEN_END)) {
+        if (IS_TOKEN(TOKEN_END))
+        {
             error("Unexpected end of variable '" + TOKEN_END + "'");
             return;
         }
 
         LOG_END("  (text)");
-        if (visible_) {
+        if (visible_)
+        {
             rendered_.append(tokens_.at(currentToken_));
         }
         CONSUME_TOKEN();
@@ -430,34 +493,50 @@ namespace mustache {
 
     void Mustache::printVariable(bool escape_html)
     {
-        const string& variable_name = tokens_.at(currentToken_);
+        const string &variable_name = tokens_.at(currentToken_);
         ensureValidIdentifier(variable_name);
         LOG(" ");
         LOG(variable_name);
-        if (visible_) {
+        if (visible_)
+        {
             json variable;
-            try {
+            try
+            {
                 variable = searchVariableInContext(variable_name);
-            } catch(const std::out_of_range& ex) {
+            }
+            catch (const std::out_of_range &ex)
+            {
                 variable = nullptr;
-            } catch(const std::invalid_argument& ex) {
+            }
+            catch (const std::invalid_argument &ex)
+            {
                 variable = nullptr;
             }
 
-            if (variable.is_primitive()) {
-                if (variable.is_null()) {
+            if (variable.is_primitive())
+            {
+                if (variable.is_null())
+                {
                     // OK
-                } else if (variable.is_boolean()) {
-                    if (variable.get<bool>()) {
+                }
+                else if (variable.is_boolean())
+                {
+                    if (variable.get<bool>())
+                    {
                         rendered_.append("true");
                     }
-                } else if (variable.is_string()) {
+                }
+                else if (variable.is_string())
+                {
                     string to_be_appended = variable.get<string>();
-                    if (escape_html) {
+                    if (escape_html)
+                    {
                         htmlEscape(to_be_appended);
                     }
                     rendered_.append(to_be_appended);
-                } else {
+                }
+                else
+                {
                     rendered_.append(variable.dump());
                 }
             }
@@ -465,7 +544,8 @@ namespace mustache {
         // else skip render invisible parts
     }
 
-    void Mustache::produceComment() {
+    void Mustache::produceComment()
+    {
         LOG_START("COMMENT := ");
         LOG_END(TOKEN_START_VARIABLE);
 
@@ -484,7 +564,8 @@ namespace mustache {
         LOG_END(TOKEN_END);
     }
 
-    void Mustache::produceSection() {
+    void Mustache::produceSection()
+    {
         bool useSection = (tokens_.at(currentToken_ - 1) == TOKEN_START_BEGIN_SECTION);
         bool useUnless = (tokens_.at(currentToken_ - 1) == TOKEN_START_UNLESS);
         bool useExistsTest = (tokens_.at(currentToken_ - 1) == TOKEN_START_EXISTS_TEST);
@@ -492,13 +573,20 @@ namespace mustache {
         LOG_START("");
         LOG_END("SECTION := ");
 #ifdef DEBUG
-        if (useSection) {
+        if (useSection)
+        {
             LOG_START(TOKEN_START_BEGIN_SECTION);
-        } else if (useUnless) {
+        }
+        else if (useUnless)
+        {
             LOG_START(TOKEN_START_UNLESS);
-        } else if (useExistsTest) {
+        }
+        else if (useExistsTest)
+        {
             LOG_START(TOKEN_START_EXISTS_TEST);
-        } else {
+        }
+        else
+        {
             LOG_START(TOKEN_START_IF);
         }
 #endif
@@ -514,22 +602,28 @@ namespace mustache {
 
         json variable;
         bool variable_exists;
-        try {
+        try
+        {
             variable = searchVariableInContext(variableName);
             variable_exists = true;
-        } catch(const std::out_of_range& ex) {
+        }
+        catch (const std::out_of_range &ex)
+        {
             variable = nullptr;
             variable_exists = false;
-        } catch(const std::invalid_argument& ex) {
+        }
+        catch (const std::invalid_argument &ex)
+        {
             variable = nullptr;
             variable_exists = false;
         }
 
         // Is variable malformed
         bool isCorrectType = variable.is_null() || variable.is_boolean() ||
-            variable.is_string() || variable.is_array() ||
-            variable.is_object() || variable.is_number();
-        if (!isCorrectType) {
+                             variable.is_string() || variable.is_array() ||
+                             variable.is_object() || variable.is_number();
+        if (!isCorrectType)
+        {
             error("Variable '" + variableName + "' is malformed");
             return;
         }
@@ -556,9 +650,11 @@ namespace mustache {
         //
         // output = 1
         //
-        if (useSection && variable.is_array() && variable.size() > 0) {
+        if (useSection && variable.is_array() && variable.size() > 0)
+        {
             const TokenIndex savedPosition = currentToken_;
-            for (json::iterator it = variable.begin(); it != variable.end(); ++it) {
+            for (json::iterator it = variable.begin(); it != variable.end(); ++it)
+            {
                 LOG_END(variable);
                 currentToken_ = savedPosition;
                 currentListCounter_ = std::distance(variable.begin(), it);
@@ -568,7 +664,9 @@ namespace mustache {
             }
             // Reset to 0 after the main cycle
             currentListCounter_ = 0;
-        } else {
+        }
+        else
+        {
             // The hide variable is used for {{= }} and {{# }} logic
             bool hide =
                 (variable.is_array() && variable.size() == 0) ||
@@ -578,11 +676,14 @@ namespace mustache {
                 (variable.is_number() && variable.get<int>() == 0) ||
                 (variable.is_null());
 
-            if (useExistsTest) {
+            if (useExistsTest)
+            {
                 // The exist test {{0 }} uses a different logic:
                 // If the key do not exists the section is not shown.
                 hide = !variable_exists;
-            } else if (useUnless) {
+            }
+            else if (useUnless)
+            {
                 // The inverted section {{^ }} uses inverted logic
                 hide = !hide;
             }
@@ -593,11 +694,13 @@ namespace mustache {
 
             // The only difference from {{# }} and {{= }} {{^ }} {{? }}
             // is the fact that tag {{# }} changes context.
-            if (useSection) {
+            if (useSection)
+            {
                 stack_.push(variable);
             }
             produceMessage();
-            if (useSection) {
+            if (useSection)
+            {
                 stack_.pop();
             }
 
@@ -611,11 +714,12 @@ namespace mustache {
 
         CONSUME_TOKEN();
         CHECK_TOKEN_NOT_EMPTY();
-        const string& variableNameEnd = tokens_.at(currentToken_);
+        const string &variableNameEnd = tokens_.at(currentToken_);
         LOG(" ");
         LOG(variableNameEnd);
         ensureValidIdentifier(variableName);
-        if (variableNameEnd != variableName) {
+        if (variableNameEnd != variableName)
+        {
             error("Expected '" + variableName + "' in closing block (found '" +
                   variableNameEnd + "')");
             return;
@@ -628,7 +732,8 @@ namespace mustache {
         LOG_END(TOKEN_END);
     }
 
-    void Mustache::producePartial() {
+    void Mustache::producePartial()
+    {
         bool useTemplate = (tokens_.at(currentToken_ - 1) == TOKEN_START_TEMPLATE);
         LOG("PARTIAL := ");
         LOG_END("");
@@ -640,7 +745,7 @@ namespace mustache {
         // Variable completePartialToken should be something like:
         //   paragraph.mustache|title=SampleTitle|text=SampleText
         // The first part is the partial file name.
-        const string& partialToken = tokens_.at(currentToken_);
+        const string &partialToken = tokens_.at(currentToken_);
         LOG(" ");
         LOG(partialToken);
         LOG(" ");
@@ -654,16 +759,20 @@ namespace mustache {
 
         // Split token using partial variable separator.
         Tokens splitted = split(partialToken, '|');
-        for (size_t i = 0; i < splitted.size(); i++) {
+        for (size_t i = 0; i < splitted.size(); i++)
+        {
             splitted.at(i) = trim(splitted.at(i));
         }
 
         // Tokenize
         string fileToRead;
-        if (useTemplate) {
+        if (useTemplate)
+        {
             LOG_END("  Use template");
             fileToRead = getTemplateNameFromContext(splitted.at(0));
-        } else {
+        }
+        else
+        {
             LOG_END("  Use normal partial");
             fileToRead = splitted.at(0);
         }
@@ -673,7 +782,8 @@ namespace mustache {
         Tokens newTokens = tokenize(viewFromPartial);
 
         // TODO: can we do better?
-        if (splitted.size() > 1) {
+        if (splitted.size() > 1)
+        {
             partialSubstitute(splitted, newTokens);
         }
 
@@ -682,7 +792,7 @@ namespace mustache {
 
         // TODO: Can we avoid iterators?
         currentToken_ = (currentToken_ - 2);
-        Tokens::iterator current = std::next( tokens_.begin(), currentToken_);
+        Tokens::iterator current = std::next(tokens_.begin(), currentToken_);
         tokens_.erase(current, current + 3);
         tokens_.insert(current, newTokens.begin(), newTokens.end());
 #ifdef DEBUG
@@ -691,30 +801,37 @@ namespace mustache {
 #endif
     }
 
-    void Mustache::partialSubstitute(const Tokens partialParams, Tokens& newTokens) {
+    void Mustache::partialSubstitute(const Tokens partialParams, Tokens &newTokens)
+    {
         Variables partialVariables;
         LOG_END("===============================================");
 
-        for (vector<string>::size_type i = 1; i != partialParams.size(); i++) {
+        for (vector<string>::size_type i = 1; i != partialParams.size(); i++)
+        {
             LOG("Token: |");
-            const string& token = partialParams.at(i);
+            const string &token = partialParams.at(i);
             LOG(token);
             LOG_END("|");
-            if (token.find_first_of("=") == string::npos) {
+            if (token.find_first_of("=") == string::npos)
+            {
                 error("Bad substitution string: missing '=' in " + token);
             }
             vector<string> pair = split(token, '=');
-            if (pair.size() != 2) {
+            if (pair.size() != 2)
+            {
                 error("Bad substitution string: missing separator in " + token);
             }
 
             VariableConstIterator lb = partialSearchVariable(partialVariables, pair.at(1));
 
-            if (lb != partialVariables.end()) {
+            if (lb != partialVariables.end())
+            {
                 // key already exists
                 // update lb->second if you care to
-                partialVariables.insert(lb, map<string, string>::value_type(pair.at(0), lb->second ));
-            } else {
+                partialVariables.insert(lb, map<string, string>::value_type(pair.at(0), lb->second));
+            }
+            else
+            {
                 // the key does not exist in the map
                 // add it to the map
                 partialVariables.insert(lb, map<string, string>::value_type(pair.at(0), pair.at(1)));
@@ -724,11 +841,12 @@ namespace mustache {
         }
 
         LOG_END("===============================================");
-        for (Tokens::size_type i = 1; i != newTokens.size(); i++) {
-            //LOG("  New token: ");
+        for (Tokens::size_type i = 1; i != newTokens.size(); i++)
+        {
+            // LOG("  New token: ");
             string tokenToCheck = newTokens.at(i);
-            string tokenToCheckPrev = newTokens.at(i-1);
-            //LOG_END(tokenToCheck);
+            string tokenToCheckPrev = newTokens.at(i - 1);
+            // LOG_END(tokenToCheck);
             if ((tokenToCheck != TOKEN_START_VARIABLE) &&
                 (tokenToCheck != TOKEN_START_BEGIN_SECTION) &&
                 (tokenToCheck != TOKEN_START_END_SECTION) &&
@@ -736,14 +854,16 @@ namespace mustache {
                 (tokenToCheck != TOKEN_START_UNLESS) &&
                 (tokenToCheck != TOKEN_START_PARTIAL) &&
                 (tokenToCheck != TOKEN_START_TEMPLATE) &&
-                (tokenToCheck != TOKEN_END)) {
+                (tokenToCheck != TOKEN_END))
+            {
 
                 // Searching
                 LOG("  Searching: ");
                 LOG(tokenToCheck);
 
                 VariableIterator lb = partialVariables.find(tokenToCheck);
-                if (lb == partialVariables.end()) {
+                if (lb == partialVariables.end())
+                {
                     LOG_END(" -> Not Found");
                     continue;
                 }
@@ -760,20 +880,25 @@ namespace mustache {
                 LOG("    at position ");
                 LOG(i);
 
-                if (valueToSubstitute[0] != '\'' && valueToSubstitute[0] != '\"') {
+                if (valueToSubstitute[0] != '\'' && valueToSubstitute[0] != '\"')
+                {
                     // Simple substitution
                     LOG_END("    with nothing");
                     // newTokens.at(i) = valueToSubstitute;
-                } else {
+                }
+                else
+                {
                     // Substitute literal
 
-                    if (tokenToCheckPrev != TOKEN_START_VARIABLE) {
+                    if (tokenToCheckPrev != TOKEN_START_VARIABLE)
+                    {
                         LOG_END("");
                         LOG_END("NOT A VARIABLE SKIP LITERAL SUBSTITUTION!");
                         continue;
                     }
 
-                    if (valueToSubstitute[valueToSubstitute.size() - 1 ] != '\'' && valueToSubstitute[valueToSubstitute.size() - 1] != '\"') {
+                    if (valueToSubstitute[valueToSubstitute.size() - 1] != '\'' && valueToSubstitute[valueToSubstitute.size() - 1] != '\"')
+                    {
                         error("Substitution string " + valueToSubstitute + " not properly closed");
                     }
                     LOG(" with literal ");
@@ -792,7 +917,8 @@ namespace mustache {
                     newTokens.erase(newTokens.begin() + i);
 
                     LOG_END("DUMP AFTER:");
-                    for (vector<string>::size_type j = 0; j != newTokens.size(); j++) {
+                    for (vector<string>::size_type j = 0; j != newTokens.size(); j++)
+                    {
                         LOG(j);
                         LOG(" ");
                         LOG_END(newTokens.at(j));
@@ -808,18 +934,22 @@ namespace mustache {
         LOG_END("===============================================");
     }
 
-    void Mustache::error(const string& message) {
+    void Mustache::error(const string &message)
+    {
         LOG_END("  [ERROR]");
         throw RenderException(message);
     }
 
-    json Mustache::searchVariableInContext(const string& key) {
+    json Mustache::searchVariableInContext(const string &key)
+    {
         // TODO: better to use a constant
-        if (key == "@index") {
+        if (key == "@index")
+        {
             json value = currentListCounter_;
             return value;
         }
-        if (key == "@first") {
+        if (key == "@first")
+        {
             json value = (currentListCounter_ == 0);
             return value;
         }
@@ -827,7 +957,8 @@ namespace mustache {
         json top = stack_.top();
         LOG_END("SEARCH CONTEXT:");
         LOG_END(top.dump(2));
-        if (top.is_null()) {
+        if (top.is_null())
+        {
             return "null"_json;
         }
 
@@ -836,11 +967,14 @@ namespace mustache {
         string::size_type index = string::npos;
         string newKey = key;
 
-        if ((start = key.find_first_of("[")) != string::npos) {
-            if ((stop = key.find_first_of("]")) == string::npos) {
+        if ((start = key.find_first_of("[")) != string::npos)
+        {
+            if ((stop = key.find_first_of("]")) == string::npos)
+            {
                 error("Missing ] in array selection");
             }
-            if (start + 1 == stop) {
+            if (start + 1 == stop)
+            {
                 error("Index is empty");
             }
             string array = key.substr(0, start);
@@ -851,22 +985,31 @@ namespace mustache {
         }
 
         json::const_iterator it = top.find(newKey);
-        if (it == top.end()) {
+        if (it == top.end())
+        {
             LOG_END("NOT FOUND:");
             throw std::invalid_argument("Variable " + key + " not found");
-        } else if (index == string::npos) {
+        }
+        else if (index == string::npos)
+        {
             LOG_END("NORMAL USE *it:");
             json value = *it;
             return value;
-        } else {
+        }
+        else
+        {
             LOG_END("USE INDEX:");
             // top exists at this point
-            if (it->is_array()) {
+            if (it->is_array())
+            {
                 LOG_END("USE ARRAY:");
-                if (index >= it->size()) {
+                if (index >= it->size())
+                {
                     LOG_END("OUT OF RANGE:");
                     throw std::out_of_range("Index " + std::to_string(index) + " is out of range");
-                } else {
+                }
+                else
+                {
                     LOG_END("IN RANGE:");
                 }
             }
@@ -875,66 +1018,84 @@ namespace mustache {
         }
     }
 
-    string Mustache::getTemplateNameFromContext(const string& key)
+    string Mustache::getTemplateNameFromContext(const string &key)
     {
         json variable;
-        try {
+        try
+        {
             variable = searchVariableInContext(key);
-        } catch(const std::out_of_range& ex) {
+        }
+        catch (const std::out_of_range &ex)
+        {
             variable = nullptr;
-        } catch(const std::invalid_argument& ex) {
+        }
+        catch (const std::invalid_argument &ex)
+        {
             variable = nullptr;
         }
 
-        if (variable.is_null()) {
+        if (variable.is_null())
+        {
             error("Missing template variable: " + key);
-        } else if (!variable.is_string()) {
+        }
+        else if (!variable.is_string())
+        {
             error("Wrong template variable type: " + key + " must be a string");
         }
 
         return variable.get<string>();
     }
 
-    Mustache::VariableConstIterator Mustache::partialSearchVariable(const Mustache::Variables& variables,
-                                                                    const string& valueToSearch) {
+    Mustache::VariableConstIterator Mustache::partialSearchVariable(const Mustache::Variables &variables,
+                                                                    const string &valueToSearch)
+    {
         VariableConstIterator it;
         LOG("  Search in variables: ");
         LOG(valueToSearch);
 
-        if (valueToSearch[0] == '\'' || valueToSearch[0] == '\"') {
+        if (valueToSearch[0] == '\'' || valueToSearch[0] == '\"')
+        {
             LOG_END("  LITERAL!");
             return variables.end();
         }
-        if ((it = variables.find(valueToSearch)) != variables.end()) {
+        if ((it = variables.find(valueToSearch)) != variables.end())
+        {
             LOG(" { ");
             LOG(it->first);
             LOG(" : ");
             LOG(it->second);
             LOG_END(" }  YES!");
-        } else {
+        }
+        else
+        {
             LOG_END("  NO!");
         }
 
         return it;
     }
 
-    void Mustache::ensureValidIdentifier(const string& id, const string& validChars) {
+    void Mustache::ensureValidIdentifier(const string &id, const string &validChars)
+    {
         std::size_t found = id.find_first_not_of(validChars);
-        if (found != string::npos) {
+        if (found != string::npos)
+        {
             error("Invalid identifier '" + id + "': bad char '" + id.at(found) + "' at index " + std::to_string(found) + " valid are " + validChars);
         }
     }
 
-    vector<string>& Mustache::split(const string &str, char delim, vector<string> &elems) {
+    vector<string> &Mustache::split(const string &str, char delim, vector<string> &elems)
+    {
         stringstream ss(str);
         string item;
-        while (std::getline(ss, item, delim)) {
+        while (std::getline(ss, item, delim))
+        {
             elems.push_back(item);
         }
         return elems;
     }
 
-    vector<string> Mustache::split(const string& str, char delim) {
+    vector<string> Mustache::split(const string &str, char delim)
+    {
         vector<string> elems;
         split(str, delim, elems);
         return elems;
@@ -942,14 +1103,19 @@ namespace mustache {
 
 #ifdef DEBUG
 
-    void Mustache::dumpTokens() {
+    void Mustache::dumpTokens()
+    {
         TokenIndex idx;
         std::cout << "Tokens (size " << tokens_.size() << "): " << std::endl;
         std::cout << "----+-------------------------------------------------" << std::endl;
-        for (idx = 0; idx < tokens_.size(); ++idx) {
-            if (idx == currentToken_) {
+        for (idx = 0; idx < tokens_.size(); ++idx)
+        {
+            if (idx == currentToken_)
+            {
                 std::cout << "==> |" << idx << "|";
-            } else {
+            }
+            else
+            {
                 std::cout << "    |" << idx << "|";
             }
             std::cout << tokens_.at(idx) << std::endl;
@@ -958,33 +1124,36 @@ namespace mustache {
     }
 #endif
 
-    // Trim a string from start
-    inline string& Mustache::ltrim(string& s) {
-        s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
-            return !std::isspace(ch);
-        }));
+    std::string& Mustache::ltrim(std::string& s)
+    {
+        auto it = std::find_if(s.begin(), s.end(), [](char c) {
+            return !std::isspace<char>(c, std::locale::classic());
+        });
+        s.erase(s.begin(), it);
         return s;
     }
 
-    // Trim a string from end
-    inline string& Mustache::rtrim(string& s) {
-        s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
-            return !std::isspace(ch);
-        }).base(), s.end());
+    std::string& Mustache::rtrim(std::string& s)
+    {
+        auto it = std::find_if(s.rbegin(), s.rend(), [](char c) {
+            return !std::isspace<char>(c, std::locale::classic());
+        });
+        s.erase(it.base(), s.end());
         return s;
     }
 
     // Trim both ends of a string
-    inline string& Mustache::trim(string & s) {
+    std::string& Mustache::trim(std::string& s) {
         return ltrim(rtrim(s));
     }
 
-    void Mustache::htmlEscape(string& data)
+    void Mustache::htmlEscape(string &data)
     {
         string buffer;
 
         auto it = data.cbegin();
-        while (it != data.cend()) {
+        while (it != data.cend())
+        {
             int sz = 1;
             const uint8_t tchar = *it;
 
@@ -993,30 +1162,53 @@ namespace mustache {
             // U+0080  - U+07FF   110xxxxx  10xxxxxx
             // U+0800  - U+FFFF   1110xxxx  10xxxxxx  10xxxxxx
             // U+10000 - U+10FFFF 11110xxx  10xxxxxx  10xxxxxx  10xxxxxx
-            if ((tchar & 0x80) == 0x80) {
+            if ((tchar & 0x80) == 0x80)
+            {
                 // Multi-byte UTF-8 character
-                if ((tchar & 0xC0) == 0xC0) {
+                if ((tchar & 0xC0) == 0xC0)
+                {
                     // 2-byte UTF-8 character
                     // 110xxxxx
                     sz = 2;
-                } else if ((tchar & 0xE0) == 0xE0) {
+                }
+                else if ((tchar & 0xE0) == 0xE0)
+                {
                     sz = 3; // 3-byte UTF-8 character
-                } else if ((tchar & 0xF8) == 0xF8) {
+                }
+                else if ((tchar & 0xF8) == 0xF8)
+                {
                     sz = 4; // 4-byte UTF-8 character
                 }
-                for (int cnt = 0; cnt < sz; ++cnt) {
+                for (int cnt = 0; cnt < sz; ++cnt)
+                {
                     buffer.push_back(*it++);
                 }
-            } else { // single-byte character
-                switch (tchar) {
-                case '&':	buffer.append("&amp;");		break;
-                case '\"':	buffer.append("&quot;");	break;
-                case '\'':	buffer.append("&apos;");	break;
-                case '<':	buffer.append("&lt;");		break;
-                case '>':	buffer.append("&gt;");		break;
-                case '%':	buffer.append("&percnt;");	break;
+            }
+            else
+            { // single-byte character
+                switch (tchar)
+                {
+                case '&':
+                    buffer.append("&amp;");
+                    break;
+                case '\"':
+                    buffer.append("&quot;");
+                    break;
+                case '\'':
+                    buffer.append("&apos;");
+                    break;
+                case '<':
+                    buffer.append("&lt;");
+                    break;
+                case '>':
+                    buffer.append("&gt;");
+                    break;
+                case '%':
+                    buffer.append("&percnt;");
+                    break;
                 default:
-                    if (! std::iscntrl(tchar)) {
+                    if (!std::iscntrl(tchar))
+                    {
                         buffer.push_back(tchar);
                     }
                     break;
@@ -1027,6 +1219,6 @@ namespace mustache {
         data.swap(buffer);
     }
 
-}  // namespace mustache
+} // namespace mustache
 
 ////////////////////////////////////////////////////////////////////////////////
