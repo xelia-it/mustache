@@ -71,7 +71,11 @@ memcheck: all
 	@if `which valgrind > /dev/null`; then \
 		echo "Checking code with valgrind"; \
 		export LD_LIBRARY_PATH=$(LD_LIBRARY_PATH):.; \
-		valgrind --leak-check=full --error-exitcode=1 ./$(TEST_NAME); \
+		valgrind \
+			--leak-check=full \
+			--show-leak-kinds=all \
+			--track-origins=yes \
+			--error-exitcode=1 ./$(TEST_NAME); \
 	else \
 		echo "valgrind not installed"; \
 		false; \
