@@ -14,6 +14,7 @@ tags
 # Binaries
 /mustache-test
 /mustache-interactive
+/mustache-benchmark
 
 # External libraries
 /json.hpp
