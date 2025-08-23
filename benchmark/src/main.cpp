@@ -47,7 +47,7 @@ using mustache::Mustache;
 // -----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-    const uint NUM_RUNS = 1000;
+    const uint NUM_RUNS = 5000;
 
     string view = "nested";
     string context = "nested";
