@@ -2,7 +2,7 @@
 
 # Jobs for testing library before accepting a Pull Request
 
-name: Run Unit Tests
+name: Build-And-Test
 
 on:
   pull_request:
@@ -12,7 +12,7 @@ on:
     - 'release/**'
 
 jobs:
-  Run-Unit-Tests:
+  Build-And-Test:
     runs-on: ubuntu-latest
 
     steps:
@@ -21,10 +21,16 @@ jobs:
       with:
           submodules: recursive
 
-    - name: build
+    - name: Build
       run: |
         make
 
-    - name: test
+    - name: Test
       run: |
         make test
+
+    - name: Memcheck
+      run: |
+        sudo apt update
+        sudo apt install -y valgrind
+        make memcheck
