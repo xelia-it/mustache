@@ -36,8 +36,8 @@ INCLUDES := \
 
 # Generic compiling flags
 CPP_LANGUAGE_VERSION := c++11
-CC_FLAGS := --std=$(CPP_LANGUAGE_VERSION) -O2 -march=native -flto -fno-plt -fPIC -Wall -Wextra -Wpedantic -Werror $(DEFS) $(INCLUDES)
-LD_FLAGS := -l$(LIBRARY_NAME) -L.
+CC_FLAGS := -std=$(CPP_LANGUAGE_VERSION) -O2 -flto=auto -fno-plt -fPIC -Wall -Wextra -Wpedantic -Werror $(DEFS) $(INCLUDES)
+LD_FLAGS := -l$(LIBRARY_NAME) -L. -flto=auto
 
 # Targets
 

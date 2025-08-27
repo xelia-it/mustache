@@ -1,12 +1,12 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
-/// @file       main.hpp
+/// @file       logger.hpp
 /// @author     Xelia snc <info@xelia.it>
 /// @copyright  The code is licensed under the MIT License.
 ///
 ///             <http://opensource.org/licenses/MIT>:
 ///
-///             Copyright (c) 2015 Xelia snc
+///             Copyright (c) Xelia snc
 ///
 ///             Permission is hereby granted, free of charge, to any person
 ///             obtaining a copy of this software and associated documentation
@@ -29,6 +29,26 @@
 ///             ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR
 ///             THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 ///
-/// @brief      Mustache test suite (common include).
+/// @brief      Logger macros.
 ///
+////////////////////////////////////////////////////////////////////////////////
+
+#pragma once
+
+#include <iostream>
+
+#ifdef DEBUG
+
+#define LOG_START(x) std::cout << (x)
+#define LOG(x) std::cout << (x)
+#define LOG_END(x) std::cout << (x) << std::endl
+
+#else
+
+#define LOG_START(x)
+#define LOG(x)
+#define LOG_END(x)
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////
