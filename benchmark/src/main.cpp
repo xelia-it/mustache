@@ -49,11 +49,10 @@ using mustache::Mustache;
 // -----------------------------------------------------------------------------
 
 void run_test(const string& name, const string& view, const string& context) {
-//  const uint NUM_RUNS = 5000;
   const uint NUM_RUNS = 10;
 
   uint64_t tot = 0;
-  cout << "Run " << std::left << std::setw(15) << name  << std::flush;
+  cout << "Run " << std::left << std::setw(25) << name  << std::flush;
 
   Mustache m("./benchmark/fixtures/");
   string rendered;
@@ -85,8 +84,10 @@ int main() {
   cout << "Mustache Benchmark Test: " << endl << endl;
 
   const std::map<std::string, std::array<std::string, 2>> TESTS = {
-      {"Nested", {"nested", "nested"}},
-      {"Big", {"big-context", "big-context"}}};
+      {"Nested Views", {"nested", "nested"}},
+      {"Small View Big Context", {"big-context", "big-context"}},
+      {"Big View Big Context", {"big-view", "big-context"}}
+  };
 
   for (const auto &pair : TESTS) {
     const std::string &key = pair.first;
