@@ -158,6 +158,55 @@ class Mustache {
     static const std::string TOKEN_END;
     static const std::string TOKEN_END_UNESCAPED;
 
+    // token helpers
+    inline bool IS_TOKEN(const std::string& token) const {
+        return tokens_.at(currentToken_) == token;
+    }
+
+    inline bool IS_TOKEN_EMPTY() const {
+        return currentToken_ == tokens_.size();
+    }
+
+    inline void CHECK_TOKEN_NOT_EMPTY() const {
+        if (currentToken_ == tokens_.size()) {
+            error("Unexpected end of file.");
+            return;
+        }
+    }
+
+    inline void CONSUME_TOKEN() {
+        ++currentToken_;
+    }
+
+    inline void CHECK_TOKEN_IS(const std::string& token) const {
+        if ((currentToken_ == tokens_.size()) || (tokens_.at(currentToken_) != token)) {
+            error("Missing " + std::string(token));
+            return;
+        }
+    }
+
+    inline void CHECK_TOKEN_IS_NOT(const std::string& token) const {
+        if ((currentToken_ == tokens_.size()) && (tokens_.at(currentToken_) == token)) {
+            error("Unexpected " + std::string(token));
+            return;
+        }
+    }
+
+    // check free text token
+    inline void CHECK_TOKEN_IS_TEXT() {
+        CHECK_TOKEN_NOT_EMPTY();
+        CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_IF);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_EXISTS_TEST);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL);
+        CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE);
+        CHECK_TOKEN_IS_NOT(TOKEN_END);
+    }
+
     /// Default extension to be used for partials
     static const std::string DEFAULT_PARTIAL_EXTENSION;
 
@@ -228,7 +277,7 @@ class Mustache {
         const std::string& valueToSearch);
 
     /// Throws an exception and stops rendering.
-    [[noreturn]] void error(const std::string& message);
+    [[noreturn]] void error(const std::string& message) const;
 
     /// Variable get in the current context
     ///

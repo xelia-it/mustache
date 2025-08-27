@@ -55,6 +55,7 @@ using std::stringstream;
 using json = nlohmann::json;
 
 #include "./mustache-light.hpp"
+#include "./logger.hpp"
 
 namespace mustache
 {
@@ -76,61 +77,6 @@ namespace mustache
     const string Mustache::TOKEN_END_UNESCAPED = "}}}";
 
     const string Mustache::DEFAULT_PARTIAL_EXTENSION = "mustache";
-
-#ifdef DEBUG
-#define LOG_START(x) cout << (x)
-#define LOG(x) cout << (x)
-#define LOG_END(x) cout << (x) << endl
-#else
-#define LOG_START(x)
-#define LOG(x)
-#define LOG_END(x)
-#endif
-
-#define IS_TOKEN(token) \
-    (tokens_.at(currentToken_) == (token))
-
-#define IS_TOKEN_EMPTY() \
-    (currentToken_ == tokens_.size())
-
-#define CHECK_TOKEN_NOT_EMPTY()           \
-    if (currentToken_ == tokens_.size())  \
-    {                                     \
-        error("Unexpected end of file."); \
-        return;                           \
-    }
-
-#define CONSUME_TOKEN() \
-    ++currentToken_
-
-#define CHECK_TOKEN_IS(token)                                                        \
-    if ((currentToken_ == tokens_.size()) || (tokens_.at(currentToken_) != (token))) \
-    {                                                                                \
-        error("Missing " + (token));                                                 \
-        return;                                                                      \
-    }
-
-#define CHECK_TOKEN_IS_NOT(token)                                                    \
-    if ((currentToken_ == tokens_.size()) && (tokens_.at(currentToken_) == (token))) \
-    {                                                                                \
-        error("Unexpected " + (token));                                              \
-        return;                                                                      \
-    }
-
-// Ensure token is (txt).
-// We need to check all known tokens because (txt) is free text.
-#define CHECK_TOKEN_IS_TEXT()                      \
-    CHECK_TOKEN_NOT_EMPTY();                       \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_VARIABLE);      \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_COMMENT);       \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_BEGIN_SECTION); \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_END_SECTION);   \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_IF);            \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_UNLESS);        \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_EXISTS_TEST);   \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_PARTIAL);       \
-    CHECK_TOKEN_IS_NOT(TOKEN_START_TEMPLATE);      \
-    CHECK_TOKEN_IS_NOT(TOKEN_END)
 
     Mustache::Mustache(const string &basePath) : basePath_(basePath), partialExtension_(DEFAULT_PARTIAL_EXTENSION),
                                                  view_(""), context_("{}"),
@@ -934,7 +880,7 @@ namespace mustache
         LOG_END("===============================================");
     }
 
-    void Mustache::error(const string &message)
+    void Mustache::error(const string &message) const
     {
         LOG_END("  [ERROR]");
         throw RenderException(message);
