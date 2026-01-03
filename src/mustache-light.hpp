@@ -37,7 +37,7 @@
 
 #include <string>
 #include <vector>
-#include <map>
+#include <unordered_map>
 #include <stack>
 #include <stdexcept>
 
@@ -73,7 +73,7 @@ class Mustache {
     // Some types (useful for readability purposes)
     // basically we uses sting and string containers.
 
-    typedef std::map<std::string, std::string> Variables;
+    typedef std::unordered_map<std::string, std::string> Variables;
     typedef Variables::iterator VariableIterator;
     typedef Variables::const_iterator VariableConstIterator;
     typedef std::string Token;

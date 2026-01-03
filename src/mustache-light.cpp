@@ -33,11 +33,10 @@
 ///
 ////////////////////////////////////////////////////////////////////////////////
 
-// #include <iostream>
 #include <vector>
 using std::vector;
-#include <map>
-using std::map;
+#include <unordered_map>
+using std::unordered_map;
 
 // Used for readFile
 #include <string>
@@ -828,13 +827,13 @@ namespace mustache
             {
                 // key already exists
                 // update lb->second if you care to
-                partialVariables.insert(lb, map<string, string>::value_type(pair.at(0), lb->second));
+                partialVariables.insert(lb, unordered_map<string, string>::value_type(pair.at(0), lb->second));
             }
             else
             {
                 // the key does not exist in the map
                 // add it to the map
-                partialVariables.insert(lb, map<string, string>::value_type(pair.at(0), pair.at(1)));
+                partialVariables.insert(lb, unordered_map<string, string>::value_type(pair.at(0), pair.at(1)));
                 // Use lb as a hint to insert,
                 // so it can avoid another lookup
             }
@@ -1147,7 +1146,7 @@ namespace mustache
         return ltrim(rtrim(s));
     }
 
-    void Mustache::htmlEscape(string &data)
+    void Mustache::htmlEscape(string& data)
     {
         string buffer;
 
