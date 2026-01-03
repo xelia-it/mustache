@@ -70,26 +70,33 @@ int main(int argc, char *argv[]) {
     string rendered;
 
     uint64_t tot = 0;
+    uint64_t tot_squared = 0;
     cout << "Run " << std::flush;
     for (uint run = 0; run < NUM_RUNS; run++) {
-        std::chrono::steady_clock::time_point begin = std::chrono::steady_clock::now();
+        // Evaluate the time for rendering a content
+        std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
         rendered = m.render(m.fileRead(view), m.fileRead(context, "json"));
-        std::chrono::steady_clock::time_point end= std::chrono::steady_clock::now();
+        std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 
         const string& error = m.error();
         if (error.size() > 0) {
-            cout << "Renddering error:" << endl << error << endl;
+            cout << "Rendering error:" << endl << error << endl;
             return 1;
         }
 
         uint64_t duration = std::chrono::duration_cast<std::chrono::microseconds>(end - begin).count();
         tot += duration;
+        tot_squared += duration * duration;
         if (run % 100 == 0) {
             cout << "." << std::flush;
         }
     }
 
-    cout << " Mean = " << tot / NUM_RUNS << " us" << endl;
+    uint64_t mean = tot / NUM_RUNS;
+    uint64_t variance = (tot_squared / NUM_RUNS) - (mean * mean);
+    uint64_t stddev = static_cast<uint64_t>(std::sqrt(static_cast<double>(variance)));
+
+    cout << "Mean = " << mean << " us, Standard deviation = " << stddev << " us" << endl;
 
     return 0;
 }
