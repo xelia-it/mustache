@@ -28,3 +28,6 @@ tags
 
 # clangd compile flags
 compile_flags.txt
+
+# ccls cache
+.ccls-cache
