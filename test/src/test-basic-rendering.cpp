@@ -46,19 +46,13 @@ TEST_CASE("Basic rendering") {
     Mustache m("./test/fixtures/");
 
     SECTION("Render empty template with null JSON") {
-        string res = m.render("", "null"_json);
+        string res = m.render("", "null");
         REQUIRE(res.empty());
         REQUIRE(m.error().empty());
     }
 
     SECTION("Render empty template with empty string") {
-        string res = m.render("", string("{}"));
-        REQUIRE(res.empty());
-        REQUIRE(m.error().empty());
-    }
-
-    SECTION("Render empty template with empty JSON") {
-        string res = m.render("", "{}"_json);
+        string res = m.render("", "{}");
         REQUIRE(res.empty());
         REQUIRE(m.error().empty());
     }

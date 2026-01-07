@@ -175,14 +175,6 @@ namespace mustache
         return render();
     }
 
-    string Mustache::render(const string &view, const json &context)
-    {
-        view_ = view;
-        data_ = context;
-
-        return render();
-    }
-
     string Mustache::error() const
     {
         return error_;

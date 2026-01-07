@@ -36,9 +36,6 @@
 #include <string>
 using std::string;
 
-#include <nlohmann/json.hpp>
-using nlohmann::json;
-
 #include <catch2/catch.hpp>
 
 #include "../../src/mustache-light.hpp"
@@ -59,8 +56,7 @@ TEST_CASE("Escape") {
     SECTION("Escape harmful chars") {
         string expected = "<p>&quot;Tom&quot; &amp; &quot;Jerry&quot; - &apos;The new adventures&apos;</p>";
         string view = "<p>{{name}}</p>";
-        json context;
-        context["name"] = "\"Tom\" & \"Jerry\" - 'The new adventures'";
+        string context = "{ \"name\": \"\\\"Tom\\\" & \\\"Jerry\\\" - 'The new adventures'\" }";
         string res = m.render(view, context);
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());
@@ -96,8 +92,7 @@ TEST_CASE("Escape") {
     SECTION("Escape accented chars") {
         string expected = "<p>àèìòù</p>";
         string view = "<p>{{name}}</p>";
-        json context;
-        context["name"] = "àèìòù";
+        string context = "{ \"name\": \"àèìòù\"}";
         string res = m.render(view, context);
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());
@@ -106,8 +101,7 @@ TEST_CASE("Escape") {
     SECTION("Escape UTF8 symbols") {
         string expected = "<p>ᐬ ⡳ ⪝ ⵁ ⸙ 砠 倭</p>";
         string view = "<p>{{name}}</p>";
-        json context;
-        context["name"] = "ᐬ ⡳ ⪝ ⵁ ⸙ 砠 倭";
+        string context = "{ \"name\": \"ᐬ ⡳ ⪝ ⵁ ⸙ 砠 倭\"}";
         string res = m.render(view, context);
         REQUIRE(res == expected);
         REQUIRE(m.error().empty());

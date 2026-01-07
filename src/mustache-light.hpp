@@ -113,18 +113,6 @@ class Mustache {
     ///
     std::string render(const std::string& view, const std::string& context);
 
-    /// Renders a template.
-    ///
-    /// @param view
-    ///      The HTML file with {{ ... }} tags
-    /// @param context
-    ///      The context (Eg: the JSON object)
-    ///
-    /// @return
-    ///     The rendered template.
-    ///
-    std::string render(const std::string& view, const nlohmann::json& context);
-
     /// Returns error message (if any) or a blank std::string if no error occured.
     ///
     /// @return
