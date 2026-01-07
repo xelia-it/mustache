@@ -47,27 +47,29 @@ using mustache::Mustache;
 // -----------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-    const uint NUM_RUNS = 5000;
+    const uint NUM_RUNS = 20000;
 
-    string view = "nested";
-    string context = "nested";
+    string view_name = "nested";
+    string context_name = "nested";
 
     if (argc == 1) {
         // OK
     } else if (argc == 2) {
-        view = argv[1];
+        view_name = argv[1];
     } else if (argc == 3) {
-        view = argv[1];
-        context = argv[2];
+        view_name = argv[1];
+        context_name = argv[2];
     } else {
         std::cerr << "Usage: " << argv[0] << " view context" << std::endl;
     }
 
-    cout << "Open view: " << view << endl;
-    cout << "Open context file: " << context << endl;
-
     Mustache m("./benchmark/fixtures/");
     string rendered;
+
+    cout << "Open view: " << view_name << endl;
+    const string& view = m.fileRead(view_name, "mustache");
+    cout << "Open context file: " << context_name << endl;
+    const string& context = m.fileRead(context_name, "json");
 
     uint64_t tot = 0;
     uint64_t tot_squared = 0;
@@ -75,7 +77,7 @@ int main(int argc, char *argv[]) {
     for (uint run = 0; run < NUM_RUNS; run++) {
         // Evaluate the time for rendering a content
         std::chrono::high_resolution_clock::time_point begin = std::chrono::high_resolution_clock::now();
-        rendered = m.render(m.fileRead(view), m.fileRead(context, "json"));
+        rendered = m.render(view, context);
         std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
 
         const string& error = m.error();
@@ -96,7 +98,10 @@ int main(int argc, char *argv[]) {
     uint64_t variance = (tot_squared / NUM_RUNS) - (mean * mean);
     uint64_t stddev = static_cast<uint64_t>(std::sqrt(static_cast<double>(variance)));
 
-    cout << "Mean = " << mean << " us, Standard deviation = " << stddev << " us" << endl;
+    cout << endl;
+    cout << "Results:" << endl;
+    cout << "  Mean = " << mean << " us" << endl;
+    cout << "  Standard deviation = " << stddev << " us" << endl;
 
     return 0;
 }

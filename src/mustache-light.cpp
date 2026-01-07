@@ -1082,15 +1082,20 @@ namespace mustache
         }
     }
 
-    vector<string> &Mustache::split(const string &str, char delim, vector<string> &elems)
-    {
-        stringstream ss(str);
-        string item;
-        while (std::getline(ss, item, delim))
-        {
-            elems.push_back(item);
-        }
-        return elems;
+    vector<string>& Mustache::split(const string& str, char delim,  vector<string> &elems) {
+      size_t start = 0;
+      size_t end = 0;
+
+      // Show all the line
+      while ((end = str.find(delim, start)) != string::npos) {
+        elems.push_back(str.substr(start, end - start));  // Add substring
+        start = end + 1;  // Move delimiter
+      }
+
+      // Add last part of the string
+      elems.push_back(str.substr(start));
+
+      return elems;
     }
 
     vector<string> Mustache::split(const string &str, char delim)
